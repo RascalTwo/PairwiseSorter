@@ -1,6 +1,6 @@
-const { MongoClient } = require('mongodb')
+const { MongoClient } = require('mongodb');
 
-const CONSTANTS = require('./constants.js')
+const CONSTANTS = require('./constants.js');
 
 let client = null;
 
@@ -13,4 +13,4 @@ module.exports = async (reconnect = false, options = {}) => {
 	}
 
 	return client;
-}
+};

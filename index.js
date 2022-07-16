@@ -1,6 +1,6 @@
 const server = require('./server.js');
-const { PORT } = require('./constants.js')
-const getClient = require('./database.js')
+const { PORT } = require('./constants.js');
+const getClient = require('./database.js');
 
 
 getClient().then(() => {
