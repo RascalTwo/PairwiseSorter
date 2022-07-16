@@ -1,4 +1,9 @@
 const server = require('./server.js');
 const { PORT } = require('./constants.js')
+const getClient = require('./database.js')
 
-server.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}/`));
+
+getClient().then(() => {
+	server.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}/`));
+});
+
