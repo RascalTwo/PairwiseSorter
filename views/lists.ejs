@@ -1,8 +1,12 @@
 <%- include('templates/header', { user: user }); -%>
 <h1>Your Lists</h1>
+<form action="/list" method="POST">
+	<label>List Name <input name="name" /></label>
+	<button>Create List</button>
+</form>
 <ul>
 	<% lists.forEach(list => { %>
-		<li><a href="/lists/<%- list._id %>"><%- list.name %></a></li>
+		<li><a href="/list/<%- list._id %>"><%- list.name %></a></li>
 	<% }) %>
 </ul>
 <%- include('templates/footer', { user: user }); -%>

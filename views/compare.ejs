@@ -1,0 +1,29 @@
+<%- include('templates/header', { user: user }); -%>
+<h1><%= list.name %> (<%= (listProgress * 100).toFixed(2) %>%)</h1>
+<div class="comparisons">
+	<div>
+		<h2><%= comparison.a.name %></h2>
+	</div>
+	<ul>
+		<li>
+			<form action="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/-1">
+				<button><</button>
+			</form>
+		</li>
+		<li>
+			<form action="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/0">
+				<button>===</button>
+			</form>
+		</li>
+		<li>
+			<form action="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/1">
+				<button>></button>
+			</form>
+		</li>
+	</ul>
+	<div>
+		<h2><%= comparison.b.name %></h2>
+	</div>
+</div>
+
+<%- include('templates/footer', { user: user }); -%>

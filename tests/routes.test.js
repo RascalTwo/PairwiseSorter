@@ -17,7 +17,7 @@ describe('/api/me', () => {
 			.expect(200)
 			.expect(response => {
 				expect(typeof response.body?.token).toEqual('string');
-				expect(typeof jwt.decode(response.body.token).id).toEqual('string');
+				expect(typeof jwt.decode(response.body.token)._id).toEqual('string');
 			})
 	);
 

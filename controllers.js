@@ -3,10 +3,12 @@ const bcrypt = require('bcrypt');
 const getClient = require('./database.js');
 const PairwiseSorter = require('./sorter.js');
 const { JWT_SECRET } = require('./constants.js');
+const { ObjectId } = require('mongodb');
+
 
 module.exports.lists = function lists(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').find({
-		owner: request.user.id
+		owner: request.user._id
 	}).toArray()).then(lists =>
 		response.render('lists', {
 			user: request.user,
@@ -16,17 +18,17 @@ module.exports.lists = function lists(request, response, next) {
 
 module.exports.homepage = function homepage(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').find({
-		owner: request.user.id
+		owner: request.user._id
 	}).toArray()).then(lists => {
 		const modified = {};
 		for (const list of lists) {
-			modified[list.id] = list.modifiedAt;
+			modified[list._id] = list.modifiedAt;
 			for (const item of list.items) {
-				modified[list.id] = Math.min(modified[list.id], item.modifiedAt);
+				modified[list._id] = Math.min(modified[list._id], item.modifiedAt);
 			}
 			for (const a in list.comparisons) {
 				for (const b in list.comparisons[a]) {
-					modified[list.id] = Math.min(modified[list.id], list.comparisons[a][b].modifiedAt);
+					modified[list._id] = Math.min(modified[list._id], list.comparisons[a][b].modifiedAt);
 				}
 			}
 		}
@@ -41,7 +43,7 @@ module.exports.homepage = function homepage(request, response, next) {
 module.exports.createList = function createList(request, response, next) {
 	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').insertOne({
-		owner: request.user.id,
+		owner: request.user._id,
 		name: request.body.name,
 		createdAt: now,
 		modifiedAt: now,
@@ -55,12 +57,12 @@ module.exports.createList = function createList(request, response, next) {
 module.exports.createItem = function createItem(request, response, next) {
 	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
-		_id: request.params.list,
-		owner: request.user.id,
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
 	}, {
 		$push: {
 			items: {
-				id: request.body.id,
+				_id: new ObjectId(),
 				name: request.body.name,
 				createdAt: now,
 				modifiedAt: now,
@@ -74,17 +76,21 @@ module.exports.createItem = function createItem(request, response, next) {
 	).catch(next);
 };
 
+const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sorter.size : 1;
+
 module.exports.getList = function getList(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
-		_id: request.params.list,
-		owner: request.user.id
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id
 	})).then(list => {
 		if (!list) return response.status(404).end();
 		const sorter = listToSorter(list);
+		console.log(list)
 		return response.render('list', {
 			user: request.user,
 			list,
-			listProgress: sorter.current.item / list.items.length,
+			listProgress: calculateProgress(sorter),
+			order: sorter.getOrder(),
 		});
 	}
 	).catch(next);
@@ -94,61 +100,66 @@ module.exports.getList = function getList(request, response, next) {
 module.exports.compareItems = function compareItems(request, response, next) {
 	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
-		_id: request.params.list,
-		owner: request.user.id,
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
 	}, {
 		$set: {
 			[`comparisons.${request.params.a}.${request.params.b}`]: {
-				result: request.params.result,
+				result: +request.params.result,
 				createdAt: now,
 				modifiedAt: now,
 			},
 		}
 	})).then(() =>
-		response.redirect('/list/' + request.params.list)
+		response.redirect('/list/' + request.params.list + '/compare')
 	).catch(next);
 };
 
 function listToSorter(list) {
 	const sorter = new PairwiseSorter(list.items.length);
 
-	let oldCT = sorter.current.try;
-	for (let question = sorter.getQuestion(); question; oldCT = sorter.current.try, question = sorter.getQuestion()) {
+	//let oldCT = sorter.current.try;
+	for (let question = sorter.getQuestion(); question; /*oldCT = sorter.current.try, */question = sorter.getQuestion()) {
 		const [ai, bi] = question;
 		const a = list.items[ai];
 		const b = list.items[bi];
-		if (list.comparisons[a.id] && list.comparisons[a.id][b.id]) {
-			sorter.addAnswer(list.comparisons[a.id][b.id].result);
-		} else if (list.comparisons[b.id] && list.comparisons[b.id][a.id]) {
-			sorter.addAnswer(list.comparisons[b.id][a.id].result);
-		} break;
+		if (list.comparisons[a._id] && list.comparisons[a._id][b._id]) {
+			sorter.addAnswer(list.comparisons[a._id][b._id].result);
+		} else if (list.comparisons[b._id] && list.comparisons[b._id][a._id]) {
+			sorter.addAnswer(list.comparisons[b._id][a._id].result);
+		} else {
+			break;
+		}
 	}
 
-	if (sorter.current.try !== oldCT) {
-		sorter.current.try = oldCT;
-	}
+	//if (sorter.current.try !== oldCT) {
+	//		sorter.current.try = oldCT;
+	//	}
 
 	return sorter;
 }
 
 module.exports.getNextComparison = function getNextComparison(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
-		_id: request.params.list,
-		owner: request.user.id,
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
 	})).then(list => {
 		const sorter = listToSorter(list);
 		const question = sorter.getQuestion();
+		if (!question) return response.redirect('/list/' + request.params.list);
 		return response.render('compare', {
 			user: request.user,
-			comparison: question ? {
+			list,
+			listProgress: calculateProgress(sorter),
+			comparison: {
 				a: list.items[question[0]],
 				b: list.items[question[1]],
-			} : null,
+			}
 		});
 	}).catch(next);
 };
 
-module.exports.logout = function logout(request, response) {
+module.exports.logout = function logout(_, response) {
 	response.clearCookie('token');
 	return response.redirect('/');
 };
@@ -198,4 +209,69 @@ module.exports.login = function login(request, response, next) {
 		response.cookie('token', token);
 		return response.redirect('/');
 	}).catch(next);
+};
+
+module.exports.deleteList = function deleteList(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').deleteOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	})).then(() =>
+		response.redirect('/')
+	).catch(next);
+};
+
+module.exports.deleteItem = function deleteItem(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	}, {
+		$pull: {
+			items: { _id: new ObjectId(request.params.item) },
+		},
+		$unset: {
+			[`comparisons.${request.params.item}`]: 1,
+		}
+	}).then(({ value: { comparisons }}) => {
+		const $unset = generateNestedUnsets(request.params.item, comparisons);
+		return client.db('pairwise-sorter').collection('lists').updateOne({
+			_id: new ObjectId(request.params.list),
+			owner: request.user._id,
+		}, {
+			$unset,
+		});
+	})).then(() =>
+		response.redirect('/list/' + request.params.list)
+	).catch(next);
+};
+
+function generateNestedUnsets(deleting, comparisons){
+	const $unset = {};
+	for (const key in comparisons) {
+		if (deleting in comparisons[key]) {
+			$unset[`comparisons.${key}.${deleting}`] = 1;
+		}
+	}
+	return $unset;
+}
+
+module.exports.resetItem = function resetItem(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	}, {
+		$unset: {
+			[`comparisons.${request.params.item}`]: 1,
+		}
+	}).then(({ value: { comparisons } }) => {
+		const $unset = generateNestedUnsets(request.params.item, comparisons);
+
+		return Object.keys($unset).length ? client.db('pairwise-sorter').collection('lists').updateOne({
+			_id: new ObjectId(request.params.list),
+			owner: request.user._id,
+		}, {
+			$unset
+		}) : null;
+	}))
+		.then(() => response.redirect('/list/' + request.params.list))
+		.catch(next);
 };

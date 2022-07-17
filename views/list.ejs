@@ -1,0 +1,36 @@
+<%- include('templates/header', { user: user }); -%>
+<h1><%= list.name %> (<%= (listProgress * 100).toFixed(2) %>%)</h1>
+<% if (listProgress < 1) { %>
+	<a href="/list/<%- list._id %>/compare">Sort</a>
+<% } %>
+<form action="/list/<%- list._id %>/delete">
+	<button>Delete</button>
+</form>
+<form action="/list/<%= list._id %>/item" method="POST">
+	<label>Item Name <input name="name" /></label>
+	<button>Add Item</button>
+</form>
+<%= JSON.stringify(order) %>
+<h2>Sorted</h2>
+<ul>
+	<% order.forEach(i => { %>
+		<li>
+			<%- list.items[i].name %>
+		</li>
+	<% }) %>
+</ul>
+<h2>Unsorted</h2>
+<ul>
+	<% list.items.forEach(item => { %>
+		<li>
+			<%- item.name %>
+			<form action="/list/<%= list._id %>/<%= item._id %>/delete">
+				<button>Delete</button>
+			</form>
+			<form action="/list/<%= list._id %>/<%= item._id %>/reset">
+				<button>Reset</button>
+			</form>
+		</li>
+	<% }) %>
+</ul>
+<%- include('templates/footer', { user: user }); -%>
