@@ -1,7 +1,9 @@
 const { MongoMemoryServer } = require('mongodb-memory-server');
+const { ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
+const CONSTANTS = require('../constants.js');
 
-
-module.exports = function createMemoryServer(constants){
+module.exports.createMemoryServer = function createMemoryServer(constants){
 	let mongod = null;
 	let oldMONGODB_URL = constants.MONGODB_URL;
 	beforeAll(async () => {
@@ -12,4 +14,9 @@ module.exports = function createMemoryServer(constants){
 		constants.MONGODB_URL = oldMONGODB_URL;
 		mongod.stop();
 	});
+};
+
+module.exports.createNewToken =  function createNewToken(){
+	const id = new ObjectId();
+	return { id, token: jwt.sign({ id }, CONSTANTS.JWT_SECRET) };
 };

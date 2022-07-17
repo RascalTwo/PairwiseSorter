@@ -1,16 +1,10 @@
 const request = require('supertest');
-const { ObjectId } = require('mongodb');
 const app = require('../server.js');
 const getClient = require('../database.js');
-const createMemoryServer = require('./helpers.js');
+const { createMemoryServer, createNewToken } = require('./helpers.js');
 const CONSTANTS = require('../constants.js');
 
 const jwt = require('jsonwebtoken');
-
-const createNewToken = () => {
-	const id = new ObjectId();
-	return { id, token: jwt.sign({ id }, CONSTANTS.JWT_SECRET) };
-};
 
 
 createMemoryServer(CONSTANTS);

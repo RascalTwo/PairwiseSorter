@@ -1,0 +1,8 @@
+<%- include('templates/header', { user: user }); -%>
+<h1>Your Lists</h1>
+<ul>
+	<% lists.forEach(list => { %>
+		<li><a href="/lists/<%- list._id %>"><%- list.name %></a></li>
+	<% }) %>
+</ul>
+<%- include('templates/footer', { user: user }); -%>

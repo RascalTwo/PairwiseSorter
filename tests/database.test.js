@@ -1,6 +1,6 @@
 const CONSTANTS = require('../constants.js');
 const getClient = require('../database.js');
-const createMemoryServer = require('./helpers.js');
+const { createMemoryServer } = require('./helpers.js');
 
 describe('database', () => {
 	describe('can be connected to', () => {

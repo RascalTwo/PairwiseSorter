@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Pairwise Sorter</title>
+		<link rel="stylesheet" href="index.css" />
+	</head>
+
+	<body>
+		<nav>
+			<ul>
+				<li><a href="/lists">Lists</a></li>
+				<% if (user.username) { %>
+					<li><a href="/logout">Logout of <%= user.username %></a></li>
+				<% } else { %>
+					<li><a href="/login">Login</a></li>
+					<li><a href="/signup">Sign Up</a></li>
+				<% } %>
+			</ul>
+		</nav>
+		<% if (locals.message) { %>
+			<p class="message"><%= locals.message %></p>
+		<% } %>
+		<main>

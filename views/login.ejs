@@ -1,0 +1,8 @@
+<%- include('templates/header', { user: user }); -%>
+<h1>Login</h1>
+<form action="/login" method="POST">
+	<label>Username <input name="username" /></label>
+	<label>Password <input type="password" name="password" /></label>
+	<button>Login</button>
+</form>
+<%- include('templates/footer', { user: user }); -%>
