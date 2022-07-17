@@ -1,6 +1,6 @@
 const express = require('express');
 const { handleToken, requireToken } = require('./middlewares.js');
-const { homepage, lists, createList, createItem, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem } = require('./controllers.js');
+const { homepage, lists, createList, createItem, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem, resetListComparisons } = require('./controllers.js');
 const router = express.Router();
 
 router.get('/', handleToken, homepage);
@@ -12,6 +12,7 @@ router.get('/list/:list', requireToken, getList);
 router.get('/list/:list/delete', requireToken, deleteList);
 router.post('/list/:list/item', requireToken, createItem);
 router.get('/list/:list/compare', requireToken, getNextComparison);
+router.get('/list/:list/reset', requireToken, resetListComparisons);
 router.get('/list/:list/:item/delete', requireToken, deleteItem);
 router.get('/list/:list/:item/reset', requireToken, resetItem);
 router.get('/list/:list/:a/:b/:result', requireToken, compareItems);

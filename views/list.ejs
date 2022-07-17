@@ -12,10 +12,11 @@
 </form>
 <%= JSON.stringify(order) %>
 <h2>Sorted</h2>
+<a href="/list/<%- list._id %>/reset">Reset</a>
 <ul>
 	<% order.forEach(i => { %>
 		<li>
-			<%- list.items[i].name %>
+			<%- list.items[i]?.name %>
 		</li>
 	<% }) %>
 </ul>

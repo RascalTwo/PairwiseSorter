@@ -221,7 +221,7 @@ module.exports.deleteList = function deleteList(request, response, next) {
 };
 
 module.exports.deleteItem = function deleteItem(request, response, next) {
-	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
 	}, {
@@ -231,20 +231,20 @@ module.exports.deleteItem = function deleteItem(request, response, next) {
 		$unset: {
 			[`comparisons.${request.params.item}`]: 1,
 		}
-	}).then(({ value: { comparisons }}) => {
+	}).then(({ value: { comparisons } }) => {
 		const $unset = generateNestedUnsets(request.params.item, comparisons);
-		return client.db('pairwise-sorter').collection('lists').updateOne({
+		return Object.keys($unset).length ? client.db('pairwise-sorter').collection('lists').updateOne({
 			_id: new ObjectId(request.params.list),
 			owner: request.user._id,
 		}, {
 			$unset,
-		});
+		}) : null;
 	})).then(() =>
 		response.redirect('/list/' + request.params.list)
 	).catch(next);
 };
 
-function generateNestedUnsets(deleting, comparisons){
+function generateNestedUnsets(deleting, comparisons) {
 	const $unset = {};
 	for (const key in comparisons) {
 		if (deleting in comparisons[key]) {
@@ -274,4 +274,17 @@ module.exports.resetItem = function resetItem(request, response, next) {
 	}))
 		.then(() => response.redirect('/list/' + request.params.list))
 		.catch(next);
+};
+
+module.exports.resetListComparisons = function resetListComparisons(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	}, {
+		$set: {
+			comparisons: {},
+		}
+	})).then(() =>
+		response.redirect('/list/' + request.params.list)
+	).catch(next);
 };
