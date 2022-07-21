@@ -8,9 +8,9 @@ module.exports.parseToken = parseToken;
 function parseToken(request, _, next) {
 	let { token } = request.cookies;
 	if (!token) return next();
-	jwt.verify(token, JWT_SECRET, (err, { _id, ...decoded }) => {
+	jwt.verify(token, JWT_SECRET, (err, decoded) => {
 		if (err) return next(err);
-		request.user = { _id: new ObjectId(_id), ...decoded };
+		request.user = { ...decoded, _id: new ObjectId(decoded._id) };
 		request.token = token;
 		next();
 	});
@@ -18,7 +18,7 @@ function parseToken(request, _, next) {
 
 module.exports.handleToken = function handleToken(request, response, next) {
 	return parseToken(request, response, (err) => {
-		if (err) return next(err);
+		if (err) console.error(err);
 
 		if (!request.token) {
 			const _id = new ObjectId();
