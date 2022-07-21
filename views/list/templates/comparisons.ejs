@@ -1,0 +1,27 @@
+<h2>Comparisons</h2>
+<ul>
+	<% denormalizedComparisons.forEach(comparison => { %>
+		<li>
+			<div class="comparisons">
+				<div><%= list.items.find(item => item._id == comparison.a).name %></div>
+				<ul>
+					<% if (comparison.result === -1) { %>
+						<li>&lt;</li>
+					<% } else if (comparison.result === 0) { %>
+						<li></li>===</li>
+					<% } else { %>
+						<li>&gt;</li>
+					<% } %>
+					<% if (isOwner) { %>
+						<li>
+							<form action="/list/<%= list._id %>/<%= comparison.a %>/<%= comparison.b %>/reset">
+								<button>Delete</button>
+							</form>
+						</li>
+					<% } %>
+				</ul>
+				<div><%= list.items.find(item => item._id == comparison.b).name %></div>
+			</div>
+		</li>
+	<% }) %>
+</ul>

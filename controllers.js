@@ -80,10 +80,13 @@ const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sort
 
 module.exports.getList = function getList(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
-		_id: new ObjectId(request.params.list),
-		owner: request.user._id
+		_id: new ObjectId(request.params.list)
 	})).then(list => {
 		if (!list) return response.status(404).end();
+
+		const isOwner = list.owner.equals(request.user._id);
+		if (!isOwner && !list.public) return response.status(403).end();
+
 		const sorter = listToSorter(list);
 
 		const denormalizedComparisons = [];
@@ -96,8 +99,9 @@ module.exports.getList = function getList(request, response, next) {
 			}
 		}
 
-		return response.render('list', {
+		return response.render('list/index', {
 			user: request.user,
+			isOwner,
 			list,
 			denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
 			listProgress: calculateProgress(sorter),
@@ -307,6 +311,28 @@ module.exports.resetListComparisons = function resetListComparisons(request, res
 			comparisons: {},
 		}
 	})).then(() =>
+		response.redirect('/list/' + request.params.list)
+	).catch(next);
+};
+
+module.exports.setListPublicity = function setListPublicity(request, response, next) {
+	const public = request.params.public === 'true';
+
+	const updateFilter = {
+		$set: {
+			modifiedAt: new Date()
+		}
+	};
+	if (public) {
+		updateFilter.$set.public = true;
+	} else {
+		updateFilter.$unset = { public: 1 };
+	}
+
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	}, updateFilter)).then(() =>
 		response.redirect('/list/' + request.params.list)
 	).catch(next);
 };

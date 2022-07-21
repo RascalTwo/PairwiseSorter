@@ -1,0 +1,26 @@
+<%- include('../templates/header', { user }); -%>
+
+<%- include('templates/title', { list, listProgress }); -%>
+
+<% if (isOwner) { %>
+	<% if (listProgress < 1) { %>
+		<a href="/list/<%- list._id %>/compare">Sort</a>
+	<% } %>
+	<a href="/list/<%- list._id %>/reset">Reset</a>
+	<form action="/list/<%- list._id %>/delete">
+		<button>Delete</button>
+	</form>
+	<form action="/list/<%- list._id %>/public/<%= !list.public %>">
+		<button>Make <%= list.public ? 'Private' : 'Public' %></button>
+	</form>
+	<form action="/list/<%= list._id %>/item" method="POST">
+		<label>Item Name <input name="name" /></label>
+		<button>Add Item</button>
+	</form>
+<% } %>
+
+<%- include('templates/sorted', { order, list }); -%>
+<%- include('templates/unsorted', { list, isOwner }); -%>
+<%- include('templates/comparisons', { denormalizedComparisons, list, isOwner }); -%>
+
+<%- include('../templates/footer', { user }); -%>

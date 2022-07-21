@@ -1,0 +1,16 @@
+<h2>Unsorted</h2>
+<ul>
+	<% list.items.forEach(item => { %>
+		<li>
+			<%- item.name %>
+			<% if (isOwner) { %>
+				<form action="/list/<%= list._id %>/<%= item._id %>/delete">
+					<button>Delete</button>
+				</form>
+				<form action="/list/<%= list._id %>/<%= item._id %>/reset">
+					<button>Reset</button>
+				</form>
+			<% } %>
+		</li>
+	<% }) %>
+</ul>
