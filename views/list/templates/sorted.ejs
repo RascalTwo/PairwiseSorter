@@ -1,8 +1,8 @@
 <h2>Sorted</h2>
-<ul>
+<ul class="list-group">
 	<% order.forEach(i => { %>
 		<% if (list.items[i]) { %>
-			<li><%= list.items[i].name %></li>
+			<li class="list-group-item"><%= list.items[i].name %></li>
 		<% } %>
 	<% }) %>
 </ul>

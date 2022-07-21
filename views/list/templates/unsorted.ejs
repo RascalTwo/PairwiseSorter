@@ -1,15 +1,13 @@
 <h2>Unsorted</h2>
-<ul>
+<ul class="list-group">
 	<% list.items.forEach(item => { %>
-		<li>
+		<li class="list-group-item d-flex justify-content-between align-items-center">
 			<%- item.name %>
 			<% if (isOwner) { %>
-				<form action="/list/<%= list._id %>/<%= item._id %>/delete">
-					<button>Delete</button>
-				</form>
-				<form action="/list/<%= list._id %>/<%= item._id %>/reset">
-					<button>Reset</button>
-				</form>
+				<div class="btn-group" role="group" aria-label="Item Actions">
+					<a class="btn btn-danger" href="/list/<%= list._id %>/<%= item._id %>/delete">Delete</a>
+					<a class="btn btn-warning" href="/list/<%= list._id %>/<%= item._id %>/reset">Reset</a>
+				</div>
 			<% } %>
 		</li>
 	<% }) %>

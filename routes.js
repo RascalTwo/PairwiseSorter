@@ -22,10 +22,16 @@ router.get('/list/:list/:a/:b/:result', requireToken, compareItems);
 
 router.get('/logout', logout);
 
-router.get('/login', handleToken, (request, response) => response.render('login', { user: request.user }));
+router.get('/login', handleToken, (request, response) => response.render('login', {
+	url: request.url,
+	user: request.user
+}));
 router.post('/login', handleToken, login);
 
-router.get('/signup', handleToken, (request, response) => response.render('signup', { user: request.user }));
+router.get('/signup', handleToken, (request, response) => response.render('signup', {
+	url: request.url,
+	user: request.user
+}));
 router.post('/signup', handleToken, signup);
 
 

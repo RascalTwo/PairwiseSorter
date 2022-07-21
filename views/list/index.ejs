@@ -3,19 +3,18 @@
 <%- include('templates/title', { list, listProgress }); -%>
 
 <% if (isOwner) { %>
-	<% if (listProgress < 1) { %>
-		<a href="/list/<%- list._id %>/compare">Sort</a>
-	<% } %>
-	<a href="/list/<%- list._id %>/reset">Reset</a>
-	<form action="/list/<%- list._id %>/delete">
-		<button>Delete</button>
-	</form>
-	<form action="/list/<%- list._id %>/public/<%= !list.public %>">
-		<button>Make <%= list.public ? 'Private' : 'Public' %></button>
-	</form>
+	<div class="btn-group" role="group" aria-label="List Actions">
+		<% if (listProgress < 1) { %>
+			<a class="btn btn-primary" href="/list/<%- list._id %>/compare">Sort</a>
+		<% } %>
+		<a class="btn btn-warning" href="/list/<%- list._id %>/reset">Reset</a>
+		<a class="btn btn-danger" href="/list/<%- list._id %>/delete">Delete</a>
+		<a class="btn btn-primary" href="/list/<%- list._id %>/public/<%= !list.public %>">Make <%= list.public ? 'Private' : 'Public' %></a>
+	</div>
 	<form action="/list/<%= list._id %>/item" method="POST">
-		<label>Item Name <input name="name" /></label>
-		<button>Add Item</button>
+		<label for="name" class="form-label">New Item Name</label>
+		<input class="form-control" id="name" name="name">
+		<button class="btn btn-primary">Add Item</button>
 	</form>
 <% } %>
 

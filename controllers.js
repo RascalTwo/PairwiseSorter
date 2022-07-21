@@ -11,6 +11,7 @@ module.exports.lists = function lists(request, response, next) {
 		owner: request.user._id
 	}).toArray()).then(lists =>
 		response.render('lists', {
+			url: request.url,
 			user: request.user,
 			lists
 		})).catch(next);
@@ -35,6 +36,7 @@ module.exports.homepage = function homepage(request, response, next) {
 		const lastModifiedID = Object.entries(modified).sort((a, b) => b[1] - a[1])[0]?.[0];
 		if (lastModifiedID) return response.redirect('/list/' + lastModifiedID);
 		return response.render('index', {
+			url: request.url,
 			user: request.user
 		});
 	}).catch(next);
@@ -100,6 +102,7 @@ module.exports.getList = function getList(request, response, next) {
 		}
 
 		return response.render('list/index', {
+			url: request.url,
 			user: request.user,
 			isOwner,
 			list,
@@ -161,6 +164,7 @@ module.exports.getNextComparison = function getNextComparison(request, response,
 		const question = sorter.getQuestion();
 		if (!question) return response.redirect('/list/' + request.params.list);
 		return response.render('compare', {
+			url: request.url,
 			user: request.user,
 			list,
 			listProgress: calculateProgress(sorter),
@@ -184,6 +188,7 @@ module.exports.signup = function signup(request, response, next) {
 		});
 		if (existing) {
 			return response.render('signup', {
+				url: request.url,
 				user: request.user,
 				message: 'Username already exists'
 			});
@@ -208,12 +213,14 @@ module.exports.login = function login(request, response, next) {
 		});
 		if (!user) {
 			return response.render('login', {
+				url: request.url,
 				user: request.user,
 				message: 'Username not found'
 			});
 		}
 		if (!await bcrypt.compare(request.body.password, user.password)) {
 			return response.render('login', {
+				url: request.url,
 				user: request.user,
 				message: 'Wrong password'
 			});

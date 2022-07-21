@@ -1,23 +1,19 @@
 <h2>Comparisons</h2>
-<ul>
+<ul class="list-group">
 	<% denormalizedComparisons.forEach(comparison => { %>
-		<li>
-			<div class="comparisons">
+		<li class="list-group-item">
+			<div class="d-flex justify-content-between align-items-center">
 				<div><%= list.items.find(item => item._id == comparison.a).name %></div>
 				<ul>
 					<% if (comparison.result === -1) { %>
-						<li>&lt;</li>
+						<div>&lt;</div>
 					<% } else if (comparison.result === 0) { %>
-						<li></li>===</li>
+						<div></div>===</div>
 					<% } else { %>
-						<li>&gt;</li>
+						<div>&gt;</div>
 					<% } %>
 					<% if (isOwner) { %>
-						<li>
-							<form action="/list/<%= list._id %>/<%= comparison.a %>/<%= comparison.b %>/reset">
-								<button>Delete</button>
-							</form>
-						</li>
+						<a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a %>/<%= comparison.b %>/reset">Delete</a>
 					<% } %>
 				</ul>
 				<div><%= list.items.find(item => item._id == comparison.b).name %></div>

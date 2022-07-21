@@ -1,12 +1,18 @@
 <%- include('templates/header', { user: user }); -%>
-<h1>Your Lists</h1>
 <form action="/list" method="POST">
-	<label>List Name <input name="name" /></label>
-	<button>Create List</button>
+	<label for="name" class="form-label">New List Name</label>
+	<input class="form-control" id="name" name="name">
+	<button class="btn btn-primary">Create List</button>
 </form>
-<ul>
+<div class="list-group">
 	<% lists.forEach(list => { %>
-		<li><a href="/list/<%- list._id %>"><%- list.name %></a></li>
+		<a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="/list/<%- list._id %>">
+			<%- list.name %>
+
+			<% if (list.items.length) { %>
+				<span class="badge bg-primary rounded-pill"><%= list.items.length %></span>
+			<% } %>
+		</a>
 	<% }) %>
 </ul>
 <%- include('templates/footer', { user: user }); -%>
