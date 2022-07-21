@@ -28,7 +28,7 @@ module.exports.homepage = function homepage(request, response, next) {
 			}
 			for (const a in list.comparisons) {
 				for (const b in list.comparisons[a]) {
-					modified[list._id] = Math.max(modified[list._id], +list.comparisons[a][b].modifiedAt);
+					modified[list._id] = Math.max(modified[list._id], +list.comparisons[a][b].createdAt);
 				}
 			}
 		}
@@ -85,9 +85,21 @@ module.exports.getList = function getList(request, response, next) {
 	})).then(list => {
 		if (!list) return response.status(404).end();
 		const sorter = listToSorter(list);
+
+		const denormalizedComparisons = [];
+		for (const a in list.comparisons) {
+			for (const b in list.comparisons[a]) {
+				denormalizedComparisons.push({
+					a, b,
+					...list.comparisons[a][b]
+				});
+			}
+		}
+
 		return response.render('list', {
 			user: request.user,
 			list,
+			denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
 			listProgress: calculateProgress(sorter),
 			order: sorter.getOrder(),
 		});
@@ -97,7 +109,6 @@ module.exports.getList = function getList(request, response, next) {
 
 
 module.exports.compareItems = function compareItems(request, response, next) {
-	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -105,8 +116,7 @@ module.exports.compareItems = function compareItems(request, response, next) {
 		$set: {
 			[`comparisons.${request.params.a}.${request.params.b}`]: {
 				result: +request.params.result,
-				createdAt: now,
-				modifiedAt: now,
+				createdAt: new Date(),
 			},
 		}
 	})).then(() =>
@@ -270,6 +280,19 @@ module.exports.resetItem = function resetItem(request, response, next) {
 		}, {
 			$unset
 		}) : null;
+	}))
+		.then(() => response.redirect('/list/' + request.params.list))
+		.catch(next);
+};
+
+module.exports.resetComparison = function resetComparison(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	}, {
+		$unset: {
+			[`comparisons.${request.params.a}.${request.params.b}`]: 1,
+		}
 	}))
 		.then(() => response.redirect('/list/' + request.params.list))
 		.catch(next);
