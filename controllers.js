@@ -22,13 +22,13 @@ module.exports.homepage = function homepage(request, response, next) {
 	}).toArray()).then(lists => {
 		const modified = {};
 		for (const list of lists) {
-			modified[list._id] = list.modifiedAt;
+			modified[list._id] = +list.modifiedAt;
 			for (const item of list.items) {
-				modified[list._id] = Math.min(modified[list._id], item.modifiedAt);
+				modified[list._id] = Math.max(modified[list._id], +item.modifiedAt);
 			}
 			for (const a in list.comparisons) {
 				for (const b in list.comparisons[a]) {
-					modified[list._id] = Math.min(modified[list._id], list.comparisons[a][b].modifiedAt);
+					modified[list._id] = Math.max(modified[list._id], +list.comparisons[a][b].modifiedAt);
 				}
 			}
 		}
@@ -85,7 +85,6 @@ module.exports.getList = function getList(request, response, next) {
 	})).then(list => {
 		if (!list) return response.status(404).end();
 		const sorter = listToSorter(list);
-		console.log(list)
 		return response.render('list', {
 			user: request.user,
 			list,
