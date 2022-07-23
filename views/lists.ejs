@@ -6,7 +6,7 @@
 </form>
 <div class="list-group">
 	<% lists.forEach(list => { %>
-		<a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="/list/<%- list._id %>">
+		<a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" href="/list/<%- list._id %>#sorted-tab">
 			<%- list.name %>
 
 			<% if (list.items.length) { %>

@@ -35,7 +35,7 @@ function homepage(request, response, next) {
 			}
 		}
 		const lastModifiedID = Object.entries(modified).sort((a, b) => b[1] - a[1])[0]?.[0];
-		if (lastModifiedID) return response.redirect('/list/' + lastModifiedID);
+		if (lastModifiedID) return response.redirect('/list/' + lastModifiedID + '#sorted-tab');
 		return response.render('index', {
 			url: request.url,
 			user: request.user
@@ -54,7 +54,7 @@ function createList(request, response, next) {
 		items: [],
 		comparisons: {}
 	})).then(({ insertedId }) =>
-		response.redirect('/list/' + insertedId.toString())
+		response.redirect('/list/' + insertedId.toString() + '#sorted-tab')
 	).catch(next);
 }
 
@@ -78,7 +78,7 @@ function createItem(request, response, next) {
 			modifiedAt: now
 		}
 	})).then(() =>
-		response.redirect('/list/' + request.params.list)
+		response.redirect('/list/' + request.params.list + '#sorted-tab')
 	).catch(next);
 }
 
@@ -167,7 +167,7 @@ function getNextComparison(request, response, next) {
 	})).then(list => {
 		const sorter = listToSorter(list);
 		const question = sorter.getQuestion();
-		if (!question) return response.redirect('/list/' + request.params.list);
+		if (!question) return response.redirect('/list/' + request.params.list + '#sorted-tab');
 		return response.render('compare', {
 			url: request.url,
 			user: request.user,
@@ -265,7 +265,7 @@ function deleteItem(request, response, next) {
 			$unset,
 		}) : null;
 	})).then(() =>
-		response.redirect('/list/' + request.params.list)
+		response.redirect('/list/' + request.params.list + '#sorted-tab')
 	).catch(next);
 }
 
@@ -297,7 +297,7 @@ function resetItem(request, response, next) {
 			$unset
 		}) : null;
 	}))
-		.then(() => response.redirect('/list/' + request.params.list))
+		.then(() => response.redirect('/list/' + request.params.list + '#sorted-tab'))
 		.catch(next);
 }
 
@@ -310,7 +310,7 @@ function resetComparison(request, response, next) {
 			[`comparisons.${request.params.a}.${request.params.b}`]: 1,
 		}
 	}))
-		.then(() => response.redirect('/list/' + request.params.list))
+		.then(() => response.redirect('/list/' + request.params.list + '#sorted-tab'))
 		.catch(next);
 }
 
@@ -323,7 +323,7 @@ function resetListComparisons(request, response, next) {
 			comparisons: {},
 		}
 	})).then(() =>
-		response.redirect('/list/' + request.params.list)
+		response.redirect('/list/' + request.params.list + '#sorted-tab')
 	).catch(next);
 }
 
@@ -345,7 +345,7 @@ function setListPublicity(request, response, next) {
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
 	}, updateFilter)).then(() =>
-		response.redirect('/list/' + request.params.list)
+		response.redirect('/list/' + request.params.list + '#sorted-tab')
 	).catch(next);
 }
 
