@@ -3,7 +3,7 @@
 <div class="d-flex justify-content-between align-items-center">
 	<h2><%= comparison.a.name %></h2>
 	<div class="btn-group" role="group" aria-label="Item Actions">
-		<a class="btn btn-primary" ref="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/-1"><</a>
+		<a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/-1"><</a>
 		<a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/0">===</a>
 		<a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/1">></a>
 	</div>
