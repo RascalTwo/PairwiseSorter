@@ -6,18 +6,19 @@ const { JWT_SECRET } = require('./constants.js');
 const { ObjectId } = require('mongodb');
 
 
-module.exports.lists = function lists(request, response, next) {
+function lists(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').find({
 		owner: request.user._id
 	}).toArray()).then(lists =>
 		response.render('lists', {
 			url: request.url,
 			user: request.user,
-			lists
+			lists,
+			...(arguments[3] || {})
 		})).catch(next);
-};
+}
 
-module.exports.homepage = function homepage(request, response, next) {
+function homepage(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').find({
 		owner: request.user._id
 	}).toArray()).then(lists => {
@@ -40,9 +41,10 @@ module.exports.homepage = function homepage(request, response, next) {
 			user: request.user
 		});
 	}).catch(next);
-};
+}
 
-module.exports.createList = function createList(request, response, next) {
+function createList(request, response, next) {
+	if (request.body.name === '') return lists(request, response, next, { message: 'List name cannot be empty' });
 	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').insertOne({
 		owner: request.user._id,
@@ -54,9 +56,11 @@ module.exports.createList = function createList(request, response, next) {
 	})).then(({ insertedId }) =>
 		response.redirect('/list/' + insertedId.toString())
 	).catch(next);
-};
+}
 
-module.exports.createItem = function createItem(request, response, next) {
+function createItem(request, response, next) {
+	if (request.body.name === '') return getList(request, response, next, { message: 'Item name cannot be empty' });
+
 	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
 		_id: new ObjectId(request.params.list),
@@ -76,11 +80,11 @@ module.exports.createItem = function createItem(request, response, next) {
 	})).then(() =>
 		response.redirect('/list/' + request.params.list)
 	).catch(next);
-};
+}
 
 const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sorter.size : 1;
 
-module.exports.getList = function getList(request, response, next) {
+function getList(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
 		_id: new ObjectId(request.params.list)
 	})).then(list => {
@@ -109,13 +113,14 @@ module.exports.getList = function getList(request, response, next) {
 			denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
 			listProgress: calculateProgress(sorter),
 			order: sorter.getOrder(),
+			...arguments[3] || {}
 		});
 	}
 	).catch(next);
-};
+}
 
 
-module.exports.compareItems = function compareItems(request, response, next) {
+function compareItems(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -129,7 +134,7 @@ module.exports.compareItems = function compareItems(request, response, next) {
 	})).then(() =>
 		response.redirect('/list/' + request.params.list + '/compare')
 	).catch(next);
-};
+}
 
 function listToSorter(list) {
 	const sorter = new PairwiseSorter(list.items.length);
@@ -155,7 +160,7 @@ function listToSorter(list) {
 	return sorter;
 }
 
-module.exports.getNextComparison = function getNextComparison(request, response, next) {
+function getNextComparison(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -174,14 +179,14 @@ module.exports.getNextComparison = function getNextComparison(request, response,
 			}
 		});
 	}).catch(next);
-};
+}
 
-module.exports.logout = function logout(_, response) {
+function logout(_, response) {
 	response.clearCookie('token');
 	return response.redirect('/');
-};
+}
 
-module.exports.signup = function signup(request, response, next) {
+function signup(request, response, next) {
 	return getClient().then(async client => {
 		const existing = await client.db('pairwise-sorter').collection('users').findOne({
 			username: new RegExp('^' + request.body.username + '$', 'i'),
@@ -204,9 +209,9 @@ module.exports.signup = function signup(request, response, next) {
 		response.cookie('token', token);
 		return response.redirect('/');
 	}).catch(next);
-};
+}
 
-module.exports.login = function login(request, response, next) {
+function login(request, response, next) {
 	return getClient().then(async client => {
 		const user = await client.db('pairwise-sorter').collection('users').findOne({
 			username: new RegExp('^' + request.body.username + '$', 'i'),
@@ -229,18 +234,18 @@ module.exports.login = function login(request, response, next) {
 		response.cookie('token', token);
 		return response.redirect('/');
 	}).catch(next);
-};
+}
 
-module.exports.deleteList = function deleteList(request, response, next) {
+function deleteList(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').deleteOne({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
 	})).then(() =>
 		response.redirect('/')
 	).catch(next);
-};
+}
 
-module.exports.deleteItem = function deleteItem(request, response, next) {
+function deleteItem(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -262,7 +267,7 @@ module.exports.deleteItem = function deleteItem(request, response, next) {
 	})).then(() =>
 		response.redirect('/list/' + request.params.list)
 	).catch(next);
-};
+}
 
 function generateNestedUnsets(deleting, comparisons) {
 	const $unset = {};
@@ -274,7 +279,7 @@ function generateNestedUnsets(deleting, comparisons) {
 	return $unset;
 }
 
-module.exports.resetItem = function resetItem(request, response, next) {
+function resetItem(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -294,9 +299,9 @@ module.exports.resetItem = function resetItem(request, response, next) {
 	}))
 		.then(() => response.redirect('/list/' + request.params.list))
 		.catch(next);
-};
+}
 
-module.exports.resetComparison = function resetComparison(request, response, next) {
+function resetComparison(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -307,9 +312,9 @@ module.exports.resetComparison = function resetComparison(request, response, nex
 	}))
 		.then(() => response.redirect('/list/' + request.params.list))
 		.catch(next);
-};
+}
 
-module.exports.resetListComparisons = function resetListComparisons(request, response, next) {
+function resetListComparisons(request, response, next) {
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOneAndUpdate({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
@@ -320,9 +325,9 @@ module.exports.resetListComparisons = function resetListComparisons(request, res
 	})).then(() =>
 		response.redirect('/list/' + request.params.list)
 	).catch(next);
-};
+}
 
-module.exports.setListPublicity = function setListPublicity(request, response, next) {
+function setListPublicity(request, response, next) {
 	const public = request.params.public === 'true';
 
 	const updateFilter = {
@@ -342,4 +347,6 @@ module.exports.setListPublicity = function setListPublicity(request, response, n
 	}, updateFilter)).then(() =>
 		response.redirect('/list/' + request.params.list)
 	).catch(next);
-};
+}
+
+module.exports = { login, logout, signup, createList, createItem, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists };

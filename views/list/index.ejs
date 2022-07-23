@@ -13,7 +13,7 @@
 	</div>
 	<form action="/list/<%= list._id %>/item" method="POST">
 		<label for="name" class="form-label">New Item Name</label>
-		<input class="form-control" id="name" name="name">
+		<input class="form-control" id="name" name="name" required>
 		<button class="btn btn-primary">Add Item</button>
 	</form>
 <% } %>
