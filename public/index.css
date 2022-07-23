@@ -11,3 +11,15 @@
 .github-corner {
 	z-index: 1;
 }
+
+.comparisons-list li {
+	min-height: 5rem;
+}
+
+.comparisons-list li ul {
+	padding: 0;
+}
+
+.comparisons-list li ul > div {
+	text-align: center;
+}
