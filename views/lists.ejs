@@ -1,7 +1,7 @@
 <%- include('templates/header', { user: user }); -%>
 <form action="/list" method="POST">
 	<label for="name" class="form-label">New List Name</label>
-	<input class="form-control" id="name" name="name">
+	<input class="form-control" id="name" name="name" required>
 	<button class="btn btn-primary">Create List</button>
 </form>
 <div class="list-group">
