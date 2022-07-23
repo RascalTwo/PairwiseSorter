@@ -23,3 +23,11 @@
 .comparisons-list li ul > div {
 	text-align: center;
 }
+
+[id$="-tab"]:target {
+	display: block;
+}
+
+[id$="-tab"]:not(:target) {
+	display: none;
+}

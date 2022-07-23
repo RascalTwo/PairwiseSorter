@@ -18,8 +18,22 @@
 	</form>
 <% } %>
 
+<ul class="nav justify-content-center nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link" href="#unsorted-tab">Unsorted</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#sorted-tab">Sorted</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#comparisons-tab">Comparisons</a>
+  </li>
+</ul>
+
 <%- include('templates/sorted', { order, list }); -%>
 <%- include('templates/unsorted', { list, isOwner }); -%>
 <%- include('templates/comparisons', { denormalizedComparisons, list, isOwner }); -%>
+
+<script src="/list.js"></script>
 
 <%- include('../templates/footer', { user }); -%>
