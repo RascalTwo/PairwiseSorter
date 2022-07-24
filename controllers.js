@@ -268,7 +268,7 @@ function deleteItem(request, response, next) {
 			$unset,
 		}) : null;
 	})).then(() =>
-		response.redirect('/list/' + request.params.list + '#sorted-tab')
+		response.redirect('/list/' + request.params.list + '#unsorted-tab')
 	).catch(next);
 }
 
@@ -313,7 +313,7 @@ function resetComparison(request, response, next) {
 			[`comparisons.${request.params.a}.${request.params.b}`]: 1,
 		}
 	}))
-		.then(() => response.redirect('/list/' + request.params.list + '#sorted-tab'))
+		.then(() => response.redirect('/list/' + request.params.list + '#comparisons-tab'))
 		.catch(next);
 }
 
