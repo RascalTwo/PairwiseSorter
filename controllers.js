@@ -360,4 +360,34 @@ function setListPublicity(request, response, next) {
 	).catch(next);
 }
 
-module.exports = { login, logout, signup, createList, createItem, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists };
+function renderRenamePage(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	})).then(list => {
+		if (!list) return response.redirect('/');
+		return response.render('list/rename', {
+			url: request.url,
+			user: request.user,
+			list: list,
+			...arguments[3] || {}
+		});
+	}).catch(next);
+}
+
+function renameList(request, response, next) {
+	if (request.body.name === '') return renderRenamePage(request, response, next, { message: 'New list name cannot be empty' });
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	}, {
+		$set: {
+			name: request.body.name,
+			modifiedAt: new Date()
+		}
+	})).then(() =>
+		response.redirect('/list/' + request.params.list + '#sorted-tab')
+	).catch(next);
+}
+
+module.exports = { login, logout, signup, createList, createItem, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists, renameList, renderRenamePage };
