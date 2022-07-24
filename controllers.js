@@ -56,7 +56,7 @@ function createList(request, response, next) {
 	).catch(next);
 }
 
-function createItem(request, response, next) {
+function createItems(request, response, next) {
 	const names = request.body.names?.split('\n').map(line => line.trim()).filter(Boolean) || [];
 	if (!names.length) return getList(request, response, next, { message: 'At least one item name required' });
 
@@ -116,8 +116,7 @@ function getList(request, response, next) {
 			order: sorter.getOrder(),
 			...arguments[3] || {}
 		});
-	}
-	).catch(next);
+	}).catch(next);
 }
 
 
@@ -140,8 +139,7 @@ function compareItems(request, response, next) {
 function listToSorter(list) {
 	const sorter = new PairwiseSorter(list.items.length);
 
-	//let oldCT = sorter.current.try;
-	for (let question = sorter.getQuestion(); question; /*oldCT = sorter.current.try, */question = sorter.getQuestion()) {
+	for (let question = sorter.getQuestion(); question; question = sorter.getQuestion()) {
 		const [ai, bi] = question;
 		const a = list.items[ai];
 		const b = list.items[bi];
@@ -153,10 +151,6 @@ function listToSorter(list) {
 			break;
 		}
 	}
-
-	//if (sorter.current.try !== oldCT) {
-	//		sorter.current.try = oldCT;
-	//	}
 
 	return sorter;
 }
@@ -390,4 +384,4 @@ function renameList(request, response, next) {
 	).catch(next);
 }
 
-module.exports = { login, logout, signup, createList, createItem, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists, renameList, renderRenamePage };
+module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists, renameList, renderRenamePage };
