@@ -59,7 +59,8 @@ function createList(request, response, next) {
 }
 
 function createItem(request, response, next) {
-	if (request.body.name === '') return getList(request, response, next, { message: 'Item name cannot be empty' });
+	const names = request.body.names?.split('\n').map(line => line.trim()).filter(Boolean) || [];
+	if (!names.length) return getList(request, response, next, { message: 'At least one item name required' });
 
 	const now = new Date();
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
@@ -68,10 +69,12 @@ function createItem(request, response, next) {
 	}, {
 		$push: {
 			items: {
-				_id: new ObjectId(),
-				name: request.body.name,
-				createdAt: now,
-				modifiedAt: now,
+				$each: names.map(name => ({
+					_id: new ObjectId(),
+					name: name,
+					createdAt: now,
+					modifiedAt: now,
+				}))
 			}
 		},
 		$set: {

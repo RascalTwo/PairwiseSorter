@@ -12,9 +12,9 @@
 		<a class="btn btn-primary" href="/list/<%- list._id %>/public/<%= !list.public %>">Make <%= list.public ? 'Private' : 'Public' %></a>
 	</div>
 	<form action="/list/<%= list._id %>/item" method="POST">
-		<label for="name" class="form-label">New Item Name</label>
-		<input class="form-control" id="name" name="name" required>
-		<button class="btn btn-primary">Add Item</button>
+		<label for="name" class="form-label">New Item(s)</label>
+		<textarea class="form-control" id="names" name="names" placeholder="One item per line" required></textarea>
+		<button class="btn btn-primary">Add Item(s)</button>
 	</form>
 <% } %>
 

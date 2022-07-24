@@ -2,7 +2,7 @@
 const links = [...document.querySelectorAll('a[href^="#"]')];
 
 const validTabs = links.map(link => link.getAttribute('href').slice(1));
-if (validTabs.indexOf(window.location.hash) === -1) window.location.hash = validTabs[1];
+if (!validTabs.includes(window.location.hash.slice(1))) window.location.hash = validTabs[1];
 
 const markActive = link => {
 	const oldActive = links.find(link => link.classList.contains('active'));
