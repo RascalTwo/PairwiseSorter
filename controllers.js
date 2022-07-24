@@ -18,29 +18,27 @@ function lists(request, response, next) {
 		})).catch(next);
 }
 
-function homepage(request, response, next) {
-	return getClient().then(client => client.db('pairwise-sorter').collection('lists').find({
-		owner: request.user._id
-	}).toArray()).then(lists => {
-		const modified = {};
-		for (const list of lists) {
-			modified[list._id] = +list.modifiedAt;
-			for (const item of list.items) {
-				modified[list._id] = Math.max(modified[list._id], +item.modifiedAt);
-			}
-			for (const a in list.comparisons) {
-				for (const b in list.comparisons[a]) {
-					modified[list._id] = Math.max(modified[list._id], +list.comparisons[a][b].createdAt);
-				}
+function getLastModifiedList(lists) {
+	const modified = {};
+	for (const list of lists) {
+		modified[list._id] = +list.modifiedAt;
+		for (const item of list.items) {
+			modified[list._id] = Math.max(modified[list._id], +item.modifiedAt);
+		}
+		for (const a in list.comparisons) {
+			for (const b in list.comparisons[a]) {
+				modified[list._id] = Math.max(modified[list._id], +list.comparisons[a][b].createdAt);
 			}
 		}
-		const lastModifiedID = Object.entries(modified).sort((a, b) => b[1] - a[1])[0]?.[0];
-		if (lastModifiedID) return response.redirect('/list/' + lastModifiedID + '#sorted-tab');
-		return response.render('index', {
-			url: request.url,
-			user: request.user
-		});
-	}).catch(next);
+	}
+	return Object.entries(modified).sort((a, b) => b[1] - a[1])[0]?.[0];
+}
+
+function homepage(request, response) {
+	return response.render('index', {
+		url: request.url,
+		user: request.user
+	});
 }
 
 function createList(request, response, next) {
@@ -210,6 +208,11 @@ function signup(request, response, next) {
 		const user = await client.db('pairwise-sorter').collection('users').insertOne(userData);
 		const token = jwt.sign({ _id: user.insertedId, username: userData.username, createdAt: userData.createdAt }, JWT_SECRET, { expiresIn: '1d' });
 		response.cookie('token', token);
+
+		const lastModifiedID = getLastModifiedList(await client.db('pairwise-sorter').collection('lists').find({
+			owner: user._id
+		}).toArray());
+		if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
 		return response.redirect('/');
 	}).catch(next);
 }
@@ -235,6 +238,11 @@ function login(request, response, next) {
 		}
 		const token = jwt.sign({ _id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1d' });
 		response.cookie('token', token);
+
+		const lastModifiedID = getLastModifiedList(await client.db('pairwise-sorter').collection('lists').find({
+			owner: user._id
+		}).toArray());
+		if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
 		return response.redirect('/');
 	}).catch(next);
 }
