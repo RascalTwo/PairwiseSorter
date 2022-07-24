@@ -1,1 +1,6 @@
-<h1><%= list.name %> <span title="List sorted percentage">- <%= (listProgress * 100).toFixed(0) %>%</span></h1>
+<h1>
+	<%= list.name %>
+	<% if (locals.listProgress) { %>
+		<small title="List sorted percentage">- <%= (listProgress * 100).toFixed(0) %>%</small>
+	<% } %>
+</h1>

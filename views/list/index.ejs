@@ -2,6 +2,7 @@
 
 <% if (isOwner) { %>
 	<div class="btn-group float-end" role="group" aria-label="List Actions">
+		<a href="/list/<%- list._id %>/rename" class="btn btn-primary">Rename</a>
 		<% if (listProgress < 1) { %>
 			<a class="btn btn-primary" href="/list/<%- list._id %>/compare">Sort</a>
 		<% } %>
