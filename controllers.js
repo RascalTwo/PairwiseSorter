@@ -200,6 +200,15 @@ function signup(request, response, next) {
 		};
 
 		const user = await client.db('pairwise-sorter').collection('users').insertOne(userData);
+
+		await client.db('pairwise-sorter').collection('lists').updateMany({
+			owner: request.user._id
+		}, {
+			$set: {
+				owner: user.insertedId
+			}
+		});
+
 		const token = jwt.sign({ _id: user.insertedId, username: userData.username, createdAt: userData.createdAt }, JWT_SECRET, { expiresIn: '1d' });
 		response.cookie('token', token);
 
@@ -230,6 +239,15 @@ function login(request, response, next) {
 				message: 'Wrong password'
 			});
 		}
+
+		await client.db('pairwise-sorter').collection('lists').updateMany({
+			owner: request.user._id
+		}, {
+			$set: {
+				owner: user._id
+			}
+		});
+
 		const token = jwt.sign({ _id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1d' });
 		response.cookie('token', token);
 
