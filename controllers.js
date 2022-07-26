@@ -384,4 +384,40 @@ function renameList(request, response, next) {
 	).catch(next);
 }
 
-module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists, renameList, renderRenamePage };
+function renderItemRenamePage(request, response, next) {
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+	})).then(list => {
+		if (!list) return response.redirect('/');
+		const itemID = new ObjectId(request.params.item);
+		const item = list.items.find(item => item._id.equals(itemID));
+		if (!item) return response.redirect('/');
+		return response.render('list/rename-item', {
+			url: request.url,
+			user: request.user,
+			list: list,
+			item,
+			...arguments[3] || {}
+		});
+	}).catch(next);
+}
+
+function renameItem(request, response, next) {
+	if (request.body.name === '') return renderItemRenamePage(request, response, next, { message: 'New item name cannot be empty' });
+	const itemID = new ObjectId(request.params.item);
+	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
+		_id: new ObjectId(request.params.list),
+		owner: request.user._id,
+		items: { $elemMatch: { _id: itemID } }
+	}, {
+		$set: {
+			modifiedAt: new Date(),
+			'items.$.name': request.body.name,
+		}
+	})).then(() =>
+		response.redirect('/list/' + request.params.list + '#unsorted-tab')
+	).catch(next);
+}
+
+module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists, renameList, renderRenamePage, renderItemRenamePage, renameItem };
