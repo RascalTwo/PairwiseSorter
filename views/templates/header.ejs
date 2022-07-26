@@ -34,6 +34,8 @@
 		</nav>
 
 		<% if (locals.message) { %>
-			<div class="container alert alert-danger" role="alert"><%= locals.message %></div>
+			<a class="container alert alert-danger position-absolute top-0 start-50" role="alert" href="<%= url %>">
+				<%= locals.message %>
+			</a>
 		<% } %>
 		<main class="container">

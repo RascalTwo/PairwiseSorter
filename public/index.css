@@ -39,3 +39,15 @@ kbd {
 	background-color: black;
 	border-radius: .25rem;
 }
+
+.alert {
+	width: max-content;
+	text-decoration: none;
+	transition: 1s all;
+	transform: translateX(-50%);
+}
+
+	.alert:hover {
+		color: inherit;
+		transform: translateX(-50%) scale(1.1);
+	}
