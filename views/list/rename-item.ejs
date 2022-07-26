@@ -2,12 +2,6 @@
 
 <%- include('templates/title', { list }); -%>
 
-<h2><%= item.name %></h2>
-
-<form method="POST">
-	<label for="name" class="form-label">New Name</label>
-	<input type="text" class="form-control" id="name" name="name" required>
-	<button class="btn btn-primary">Rename</button>
-</form>
+<%- include('templates/rename-form', { list, title: 'Item', value: item.name, returnTab: 'unsorted-tab' }); -%>
 
 <%- include('../templates/footer', { user }); -%>
