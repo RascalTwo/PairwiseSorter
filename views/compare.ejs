@@ -1,7 +1,8 @@
 <%- include('templates/header', { user: user }); -%>
 <h1 class="text-center"><%= list.name %> (<%= (listProgress * 100).toFixed(2) %>%)</h1>
 <p class="text-center">Choose which item should be sorted higher</p>
-<div class="container text-center">
+<p class="text-center">You can additionally keyboard controls <kbd title="Left Arrow or A"><-</kbd>, <kbd title="Up Arrow or W">^</kbd>, and <kbd title="Right Arrow or D">-></kbd> to choose the options</p>
+<div id="comparisons-container" class="container text-center">
   <div class="row align-items-center">
     <div class="col">
       <a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a._id %>/<%= comparison.b._id %>/-1"><%= comparison.a.name %></a>
@@ -14,5 +15,7 @@
     </div>
   </div>
 </div>
+
+<script src="/compare.js"></script>
 
 <%- include('templates/footer', { user: user }); -%>

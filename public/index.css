@@ -31,3 +31,11 @@
 [id$="-tab"]:not(:target) {
 	display: none;
 }
+
+kbd {
+	padding: .1875rem .375rem;
+	font-size: .875em;
+	color: white;
+	background-color: black;
+	border-radius: .25rem;
+}
