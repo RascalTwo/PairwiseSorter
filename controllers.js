@@ -127,12 +127,12 @@ function compareItems(request, response, next) {
 	}, {
 		$set: {
 			[`comparisons.${request.params.a}.${request.params.b}`]: {
-				result: +request.params.result,
+				result: +request.body.result,
 				createdAt: new Date(),
 			},
 		}
 	})).then(() =>
-		response.redirect('/list/' + request.params.list + '/compare')
+		response.redirect('/list/' + request.params.list + '/comparisons')
 	).catch(next);
 }
 
@@ -163,7 +163,7 @@ function getNextComparison(request, response, next) {
 		const sorter = listToSorter(list);
 		const question = sorter.getQuestion();
 		if (!question) return response.redirect('/list/' + request.params.list + '#sorted-tab');
-		return response.render('compare', {
+		return response.render('comparisons', {
 			url: request.url,
 			user: request.user,
 			list,
@@ -350,54 +350,32 @@ function resetListComparisons(request, response, next) {
 	).catch(next);
 }
 
-function setListPublicity(request, response, next) {
-	const public = request.params.public === 'true';
+function patchList(request, response, next) {
+	if (request.body.name === '') return getList(request, response, next, { message: 'New list name cannot be empty' });
 
 	const updateFilter = {
 		$set: {
 			modifiedAt: new Date()
 		}
 	};
-	if (public) {
-		updateFilter.$set.public = true;
-	} else {
-		updateFilter.$unset = { public: 1 };
+
+	if ('public' in request.body) {
+		if (request.body.public === 'true') {
+			request.body.public = true;
+		} else if (request.body.public === 'false') {
+			updateFilter.$unset = { public: 1 };
+			delete request.body.public;
+		} else {
+			return getList(request, response, next, { message: 'Invalid public value' });
+		}
 	}
+
+	Object.assign(updateFilter.$set, request.body);
 
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
 	}, updateFilter)).then(() =>
-		response.redirect('/list/' + request.params.list + '#sorted-tab')
-	).catch(next);
-}
-
-function renderRenamePage(request, response, next) {
-	return getClient().then(client => client.db('pairwise-sorter').collection('lists').findOne({
-		_id: new ObjectId(request.params.list),
-		owner: request.user._id,
-	})).then(list => {
-		if (!list) return response.redirect('/');
-		return response.render('list/rename', {
-			url: request.url,
-			user: request.user,
-			list: list,
-			...arguments[3] || {}
-		});
-	}).catch(next);
-}
-
-function renameList(request, response, next) {
-	if (request.body.name === '') return renderRenamePage(request, response, next, { message: 'New list name cannot be empty' });
-	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
-		_id: new ObjectId(request.params.list),
-		owner: request.user._id,
-	}, {
-		$set: {
-			name: request.body.name,
-			modifiedAt: new Date()
-		}
-	})).then(() =>
 		response.redirect('/list/' + request.params.list + '#sorted-tab')
 	).catch(next);
 }
@@ -421,21 +399,24 @@ function renderItemRenamePage(request, response, next) {
 	}).catch(next);
 }
 
-function renameItem(request, response, next) {
+function patchItem(request, response, next) {
 	if (request.body.name === '') return renderItemRenamePage(request, response, next, { message: 'New item name cannot be empty' });
-	const itemID = new ObjectId(request.params.item);
+
+	const now = new Date();
+
 	return getClient().then(client => client.db('pairwise-sorter').collection('lists').updateOne({
 		_id: new ObjectId(request.params.list),
 		owner: request.user._id,
-		items: { $elemMatch: { _id: itemID } }
+		items: { $elemMatch: { _id: new ObjectId(request.params.item) } }
 	}, {
 		$set: {
-			modifiedAt: new Date(),
+			modifiedAt: now,
 			'items.$.name': request.body.name,
+			'items.$.modifiedAt': now,
 		}
 	})).then(() =>
 		response.redirect('/list/' + request.params.list + '#unsorted-tab')
 	).catch(next);
 }
 
-module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, setListPublicity, compareItems, getNextComparison, getList, homepage, lists, renameList, renderRenamePage, renderItemRenamePage, renameItem };
+module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, compareItems, getNextComparison, getList, homepage, lists, renderItemRenamePage, patchItem, patchList };

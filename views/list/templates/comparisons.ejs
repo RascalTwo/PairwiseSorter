@@ -11,7 +11,7 @@
 					<div>&gt;</div>
 				<% } %>
 				<% if (isOwner) { %>
-					<a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a %>/<%= comparison.b %>/reset">Delete</a>
+					<a class="btn btn-primary" href="/list/<%= list._id %>/<%= comparison.a %>/<%= comparison.b %>?_method=DELETE">Delete</a>
 				<% } %>
 			</ul>
 			<div><%= list.items.find(item => item._id == comparison.b).name %></div>
