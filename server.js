@@ -3,7 +3,11 @@ const { createEngine } = require('express-react-views');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
-const { NODE_ENV } = require('./constants');
+const { ObjectId } = require('mongodb');
+const MongoStore = require('connect-mongo');
+const expressSession = require('express-session');
+const setupPassport = require('./passport');
+const { SESSION_SECRET, MONGODB_URL, NODE_ENV } = require('./constants');
 
 const app = express();
 
@@ -31,6 +35,14 @@ app.use(methodOverride((request) => {
 app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.static('./public'));
 app.use(cookieParser());
+app.use(expressSession({
+	genid: () => new ObjectId().toString(),
+	secret: SESSION_SECRET, // TODO - move to env variable
+	resave: true,
+	saveUninitialized: true,
+	store: MongoStore.create({ mongoUrl: MONGODB_URL })
+}));
+setupPassport(app);
 
 app.use(require('./routes.js'));
 

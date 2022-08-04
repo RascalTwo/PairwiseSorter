@@ -8,6 +8,11 @@ module.exports = model('User', new Schema({
 	},
 	password: {
 		type: String,
-		required: true
+	},
+	connected: {
+		googleId: {
+			type: String,
+		},
+		default: {}
 	}
 }, { timestamps: { createdAt: true } }), 'users');

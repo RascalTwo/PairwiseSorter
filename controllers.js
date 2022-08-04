@@ -1,9 +1,8 @@
-const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const bcrypt = require('bcrypt');
 const List = require('./models/List');
 const User = require('./models/User');
 const PairwiseSorter = require('./sorter.js');
-const { JWT_SECRET } = require('./constants.js');
 
 
 function lists(request, response, next) {
@@ -161,9 +160,8 @@ function getNextComparison(request, response, next) {
 	}).catch(next);
 }
 
-function logout(_, response) {
-	response.clearCookie('token');
-	return response.redirect('/');
+function logout(request, response, next) {
+	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
 
 function signup(request, response, next) {
@@ -180,7 +178,6 @@ function signup(request, response, next) {
 		const userData = {
 			username: request.body.username,
 			password: await bcrypt.hash(request.body.password, 10),
-			createdAt: new Date(),
 		};
 
 		const user = await new User(userData).save();
@@ -193,43 +190,25 @@ function signup(request, response, next) {
 			}
 		});
 
-		const token = jwt.sign({ _id: user._id, username: userData.username, createdAt: userData.createdAt }, JWT_SECRET, { expiresIn: '1d' });
-		response.cookie('token', token);
-
 		const lastModifiedID = getLastModifiedList(await List.find({
 			owner: user._id
 		}));
-		if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
-		return response.redirect('/');
+
+		request.login(user, err => {
+			if (err) return next(err);
+
+			if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
+			return response.redirect('/');
+		});
 	}).catch(next);
 }
 
 function login(request, response, next) {
-	User.findOne({ username: new RegExp('^' + request.body.username + '$', 'i') }).then(async user => {
-		if (!user) {
-			return response.render('login', {
-				url: request.url,
-				user: request.user,
-				message: 'Username not found'
-			});
-		}
-		if (!await bcrypt.compare(request.body.password, user.password)) {
-			return response.render('login', {
-				url: request.url,
-				user: request.user,
-				message: 'Wrong password'
-			});
-		}
-
-		await List.updateMany({ owner: request.user._id }, {
-			owner: user._id
-		});
-
-		const token = jwt.sign({ _id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1d' });
-		response.cookie('token', token);
-
+	List.updateMany({ owner: request.oldSessionId }, {
+		owner: request.user._id
+	}).then(async () => {
 		const lastModifiedID = getLastModifiedList(await List.find({
-			owner: user._id
+			owner: request.user._id
 		}));
 		if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
 		return response.redirect('/');
