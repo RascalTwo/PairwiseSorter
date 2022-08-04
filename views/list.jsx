@@ -30,7 +30,7 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 				</details>
 
 				<form action={`/list/${list._id}`} method="POST">
-					<label for="name" className="form-label">New Item(s)</label>
+					<label htmlFor="name" className="form-label">New Item(s)</label>
 					<textarea className="form-control" id="names" name="names" placeholder="One item per line" required></textarea>
 					<button className="btn btn-primary">Add Item(s)</button>
 				</form>

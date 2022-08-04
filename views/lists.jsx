@@ -4,7 +4,7 @@ import Main from './Main';
 export default function Index({ lists, ...mainProps}) {
 	return <Main {...mainProps}>
 		<form action="/list" method="POST">
-			<label for="name" className="form-label">New List Name</label>
+			<label htmlFor="name" className="form-label">New List Name</label>
 			<input className="form-control" id="name" name="name" required />
 			<button className="btn btn-primary">Create List</button>
 		</form>
