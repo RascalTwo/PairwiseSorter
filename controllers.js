@@ -57,7 +57,7 @@ function createItems(request, response, next) {
 	if (!names.length) return getList(request, response, next, { message: 'At least one item name required' });
 
 	List.updateOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$push: {
@@ -75,7 +75,7 @@ function createItems(request, response, next) {
 const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sorter.size : 1;
 
 function getList(request, response, next) {
-	return List.findOne({ _id: new ObjectId(request.params.list)}).then(list => {
+	return List.findOne({ _id: request.params.list}).then(list => {
 		if (!list) return response.status(404).end();
 
 		const isOwner = list.owner.equals(request.user._id);
@@ -109,7 +109,7 @@ function getList(request, response, next) {
 
 function compareItems(request, response, next) {
 	return List.updateOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$set: {
@@ -143,7 +143,7 @@ function listToSorter(list) {
 
 function getNextComparison(request, response, next) {
 	return List.findOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}).then(list => {
 		const sorter = listToSorter(list);
@@ -239,7 +239,7 @@ function login(request, response, next) {
 
 function deleteList(request, response, next) {
 	return List.deleteOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}).then(() =>
 		response.redirect('/')
@@ -248,11 +248,11 @@ function deleteList(request, response, next) {
 
 function deleteItem(request, response, next) {
 	return List.findOneAndUpdate({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$pull: {
-			items: { _id: new ObjectId(request.params.item) },
+			items: { _id: request.params.item },
 		},
 		$unset: {
 			[`comparisons.${request.params.item}`]: 1,
@@ -260,7 +260,7 @@ function deleteItem(request, response, next) {
 	}).then(({ comparisons }) => {
 		const $unset = generateNestedUnsets(request.params.item, comparisons);
 		return Object.keys($unset).length ? List.updateOne({
-			_id: new ObjectId(request.params.list),
+			_id: request.params.list,
 			owner: request.user._id,
 		}, {
 			$unset,
@@ -282,7 +282,7 @@ function generateNestedUnsets(deleting, comparisons) {
 
 function resetItem(request, response, next) {
 	return List.findOneAndUpdate({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$unset: {
@@ -292,7 +292,7 @@ function resetItem(request, response, next) {
 		const $unset = generateNestedUnsets(request.params.item, comparisons);
 
 		return Object.keys($unset).length ? List.updateOne({
-			_id: new ObjectId(request.params.list),
+			_id: request.params.list,
 			owner: request.user._id,
 		}, {
 			$unset
@@ -304,7 +304,7 @@ function resetItem(request, response, next) {
 
 function resetComparison(request, response, next) {
 	return List.findOneAndUpdate({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$unset: {
@@ -317,7 +317,7 @@ function resetComparison(request, response, next) {
 
 function resetListComparisons(request, response, next) {
 	return List.findOneAndUpdate({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$set: {
@@ -349,7 +349,7 @@ function patchList(request, response, next) {
 	Object.assign(updateFilter.$set, request.body);
 
 	return List.updateOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}, updateFilter).then(() =>
 		response.redirect('/list/' + request.params.list + '#sorted-tab')
@@ -358,11 +358,11 @@ function patchList(request, response, next) {
 
 function renderItemRenamePage(request, response, next) {
 	return List.findOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
 	}).then(list => {
 		if (!list) return response.redirect('/');
-		const itemID = new ObjectId(request.params.item);
+		const itemID = request.params.item;
 		const item = list.items.find(item => item._id.equals(itemID));
 		if (!item) return response.redirect('/');
 		return response.render('list/rename-item', {
@@ -378,9 +378,9 @@ function renderItemRenamePage(request, response, next) {
 function patchItem(request, response, next) {
 	if (request.body.name === '') return renderItemRenamePage(request, response, next, { message: 'New item name cannot be empty' });
 	return List.updateOne({
-		_id: new ObjectId(request.params.list),
+		_id: request.params.list,
 		owner: request.user._id,
-		items: { $elemMatch: { _id: new ObjectId(request.params.item) } }
+		items: { $elemMatch: { _id: request.params.item } }
 	}, {
 		$set: {
 			'items.$.name': request.body.name

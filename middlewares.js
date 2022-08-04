@@ -10,7 +10,7 @@ function parseToken(request, _, next) {
 	if (!token) return next();
 	jwt.verify(token, JWT_SECRET, (err, decoded) => {
 		if (err) return next(err);
-		request.user = { ...decoded, _id: new ObjectId(decoded._id) };
+		request.user = decoded;
 		request.token = token;
 		next();
 	});
