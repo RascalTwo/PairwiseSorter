@@ -1,6 +1,6 @@
 {
   "name": "pairwisesorter",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
     "mongoose": "^6.5.0",
     "morgan": "^1.10.0",
     "passport": "^0.6.0",
+    "passport-discord": "^0.1.4",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "react": "^16.14.0",

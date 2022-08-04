@@ -13,6 +13,9 @@ module.exports = model('User', new Schema({
 		googleId: {
 			type: String,
 		},
+		discordId: {
+			type: String,
+		},
 		default: {}
 	}
 }, { timestamps: { createdAt: true } }), 'users');

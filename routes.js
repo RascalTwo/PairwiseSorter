@@ -1,5 +1,6 @@
 const express = require('express');
 const passport = require('passport');
+const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID } = require('./constants');
 
 const { homepage, lists, createList, createItems, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem, resetListComparisons, resetComparison, renderItemRenamePage, patchItem, patchList } = require('./controllers.js');
 const router = express.Router();
@@ -37,25 +38,46 @@ router.route('/list/:list/:a/:b')
 	.post(compareItems)
 	.delete(resetComparison);
 
-router.get('/login/google', passport.authenticate('google'));
-router.get('/oauth2/redirect/google',
-	passport.authenticate('google', { failureRedirect: '/login', failureMessage: true }),
-	(_, response) => response.redirect('/')
-);
+const hasGoogle = !!GOOGLE_CLIENT_ID;
+
+if (hasGoogle) {
+	router.get('/login/google', passport.authenticate('google'));
+	router.get('/oauth2/redirect/google',
+		passport.authenticate('google', { failureRedirect: '/login', failureMessage: true }),
+		(_, response) => response.redirect('/')
+	);
+}
+
+const hasDiscord = !!DISCORD_CLIENT_ID;
+if (hasDiscord) {
+	router.get('/login/discord', passport.authenticate('discord'));
+	router.get('/oauth2/redirect/discord',
+		passport.authenticate('discord', { failureRedirect: '/login', failureMessage: true }),
+		(_, response) => response.redirect('/')
+	);
+}
 
 router.get('/logout', logout);
 
 router.route('/login')
 	.get((request, response) => response.render('login', {
 		url: request.url,
-		user: request.user
+		user: request.user,
+		has: {
+			google: hasGoogle,
+			discord: hasDiscord
+		}
 	}))
 	.post(passport.authenticate('local', { failureRedirect: '/login' }), login);
 
 router.route('/signup')
 	.get((request, response) => response.render('signup', {
 		url: request.url,
-		user: request.user
+		user: request.user,
+		has: {
+			google: hasGoogle,
+			discord: hasDiscord
+		}
 	}))
 	.post(signup);
 
