@@ -4,7 +4,6 @@ const List = require('./models/List');
 const User = require('./models/User');
 const PairwiseSorter = require('./sorter.js');
 const { JWT_SECRET } = require('./constants.js');
-const { ObjectId } = require('mongodb');
 
 
 function lists(request, response, next) {
@@ -93,7 +92,7 @@ function getList(request, response, next) {
 			}
 		}
 
-		return response.render('list/index', {
+		return response.render('list', {
 			url: request.url,
 			user: request.user,
 			isOwner,
@@ -190,11 +189,11 @@ function signup(request, response, next) {
 			owner: request.user._id
 		}, {
 			$set: {
-				owner: user.insertedId
+				owner: user._id
 			}
 		});
 
-		const token = jwt.sign({ _id: user.insertedId, username: userData.username, createdAt: userData.createdAt }, JWT_SECRET, { expiresIn: '1d' });
+		const token = jwt.sign({ _id: user._id, username: userData.username, createdAt: userData.createdAt }, JWT_SECRET, { expiresIn: '1d' });
 		response.cookie('token', token);
 
 		const lastModifiedID = getLastModifiedList(await List.find({
@@ -365,7 +364,7 @@ function renderItemRenamePage(request, response, next) {
 		const itemID = request.params.item;
 		const item = list.items.find(item => item._id.equals(itemID));
 		if (!item) return response.redirect('/');
-		return response.render('list/rename-item', {
+		return response.render('rename-item', {
 			url: request.url,
 			user: request.user,
 			list: list,

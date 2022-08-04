@@ -1,4 +1,5 @@
 const express = require('express');
+const { createEngine } = require('express-react-views');
 const methodOverride = require('method-override');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
@@ -6,7 +7,8 @@ const { NODE_ENV } = require('./constants');
 
 const app = express();
 
-app.set('view engine', 'ejs');
+app.engine('jsx', createEngine());
+app.set('view engine', 'jsx');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride((request) => {

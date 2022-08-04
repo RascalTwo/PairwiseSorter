@@ -1,0 +1,10 @@
+{
+	"rules": {
+		"no-unused-vars": [
+			"warn",
+			{
+				"varsIgnorePattern": "(React|Main|NavLink|AuthForm|Title|RenameForm|SortedList|UnsortedList|ComparisonsList)"
+			}
+		]
+	}
+}

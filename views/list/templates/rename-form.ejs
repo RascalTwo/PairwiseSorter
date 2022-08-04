@@ -1,9 +1,0 @@
-<form method="POST">
-	<input type="hidden" name="_method" value="PATCH">
-	<label for="name" class="form-label">New <%= title %> Name</label>
-	<input type="text" class="form-control" id="name" name="name" required value="<%= value %>">
-	<div class="btn-group float-end" role="group" aria-label="List Actions">
-		<button class="btn btn-primary">Rename</button>
-		<a href="/list/<%= list._id %><%= locals.returnTab ? '#' + locals.returnTab : '' %>" class="btn btn-danger">Cancel</a>
-	</div>
-</form>
