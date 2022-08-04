@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../../server.js');
-const getClient = require('../../database.js');
+const getClient = require('../../models/database.js');
 const CONSTANTS = require('../../constants.js');
 const { createMemoryServer } = require('../helpers.js');
 describe('homepage', () => {

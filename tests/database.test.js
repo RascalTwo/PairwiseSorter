@@ -1,5 +1,5 @@
 const CONSTANTS = require('../constants.js');
-const getClient = require('../database.js');
+const getClient = require('../models/database.js');
 const { createMemoryServer } = require('./helpers.js');
 
 describe('database', () => {

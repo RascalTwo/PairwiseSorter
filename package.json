@@ -1,6 +1,6 @@
 {
   "name": "pairwisesorter",
-  "version": "1.10.3",
+  "version": "1.10.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mongodb": "^4.8.0",
+    "mongoose": "^6.5.0",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
