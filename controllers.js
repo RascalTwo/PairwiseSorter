@@ -30,10 +30,20 @@ function getLastModifiedList(lists) {
 	return Object.entries(modified).sort((a, b) => b[1] - a[1])[0]?.[0];
 }
 
-function homepage(request, response) {
+async function homepage(request, response) {
+	const lists = await List.find({ public: true });
 	return response.render('index', {
 		url: request.url,
-		user: request.user
+		user: request.user,
+		lists: lists.map(list => {
+			const sorter = listToSorter(list);
+
+			return {
+				...list.toObject(),
+				progress: calculateProgress(sorter),
+				order: sorter.getOrder(),
+			};
+		})
 	});
 }
 
