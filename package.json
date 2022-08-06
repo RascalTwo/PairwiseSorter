@@ -1,13 +1,14 @@
 {
   "name": "pairwisesorter",
-  "version": "1.12.2",
+  "version": "1.12.3",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
     "start": "node index.js",
-    "dev": "concurrently \"nodemon index.js\" \"wait-on tcp:1337 && browser-sync start --proxy localhost:1337 --files 'views,public'\""
+    "dev": "concurrently \"nodemon index.js\" \"wait-on tcp:1337 && browser-sync start --proxy localhost:1337 --files 'views,public'\"",
+    "preinstall": "node scripts/create-env.js"
   },
   "author": "",
   "license": "ISC",
