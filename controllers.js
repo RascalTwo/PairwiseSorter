@@ -1,19 +1,17 @@
-const passport = require('passport');
 const bcrypt = require('bcrypt');
 const List = require('./models/List');
 const User = require('./models/User');
 const PairwiseSorter = require('./sorter.js');
 
 
-function lists(request, response, next) {
-	return List.find({ owner: request.user._id }).then(lists =>
-		response.render('lists', {
-			url: request.url,
-			user: request.user,
-			lists,
-			...(arguments[3] || {})
-		})
-	).catch(next);
+async function lists(request, response) {
+	const lists = await List.find({ owner: request.user._id });
+	response.render('lists', {
+		url: request.url,
+		user: request.user,
+		lists,
+		...(arguments[3] || {})
+	});
 }
 
 function getLastModifiedList(lists) {
@@ -39,22 +37,22 @@ function homepage(request, response) {
 	});
 }
 
-function createList(request, response, next) {
+async function createList(request, response, next) {
 	if (request.body.name === '') return lists(request, response, next, { message: 'List name cannot be empty' });
 
-	return new List({
+	const newList = await new List({
 		owner: request.user._id,
 		name: request.body.name,
-	}).save().then(({ _id }) =>
-		response.redirect('/list/' + _id.toString() + '#sorted-tab')
-	).catch(next);
+	}).save();
+
+	response.redirect('/list/' + newList._id.toString() + '#sorted-tab');
 }
 
-function createItems(request, response, next) {
+async function createItems(request, response, next) {
 	const names = request.body.names?.split('\n').map(line => line.trim()).filter(Boolean) || [];
 	if (!names.length) return getList(request, response, next, { message: 'At least one item name required' });
 
-	List.updateOne({
+	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
 	}, {
@@ -65,48 +63,47 @@ function createItems(request, response, next) {
 				}))
 			}
 		}
-	}).then(() =>
-		response.redirect('/list/' + request.params.list + '#sorted-tab')
-	).catch(next);
+	});
+
+	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
 const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sorter.size : 1;
 
-function getList(request, response, next) {
-	return List.findOne({ _id: request.params.list}).then(list => {
-		if (!list) return response.status(404).end();
+async function getList(request, response) {
+	const list = await List.findOne({ _id: request.params.list });
+	if (!list) return response.status(404).end();
 
-		const isOwner = list.owner.equals(request.user._id);
-		if (!isOwner && !list.public) return response.status(403).end();
+	const isOwner = list.owner.equals(request.user._id);
+	if (!isOwner && !list.public) return response.status(403).end();
 
-		const sorter = listToSorter(list);
+	const sorter = listToSorter(list);
 
-		const denormalizedComparisons = [];
-		for (const a of list.comparisons.keys()) {
-			for (const b of list.comparisons.get(a).keys()) {
-				denormalizedComparisons.push({
-					a, b,
-					...list.comparisons.get(a).get(b).toObject()
-				});
-			}
+	const denormalizedComparisons = [];
+	for (const a of list.comparisons.keys()) {
+		for (const b of list.comparisons.get(a).keys()) {
+			denormalizedComparisons.push({
+				a, b,
+				...list.comparisons.get(a).get(b).toObject()
+			});
 		}
+	}
 
-		return response.render('list', {
-			url: request.url,
-			user: request.user,
-			isOwner,
-			list,
-			denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
-			listProgress: calculateProgress(sorter),
-			order: sorter.getOrder(),
-			...arguments[3] || {}
-		});
-	}).catch(next);
+	return response.render('list', {
+		url: request.url,
+		user: request.user,
+		isOwner,
+		list,
+		denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
+		listProgress: calculateProgress(sorter),
+		order: sorter.getOrder(),
+		...arguments[3] || {}
+	});
 }
 
 
-function compareItems(request, response, next) {
-	return List.updateOne({
+async function compareItems(request, response) {
+	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
 	}, {
@@ -115,9 +112,9 @@ function compareItems(request, response, next) {
 				result: +request.body.result
 			},
 		}
-	}).then(() =>
-		response.redirect('/list/' + request.params.list + '/comparisons')
-	).catch(next);
+	});
+
+	response.redirect('/list/' + request.params.list + '/comparisons');
 }
 
 function listToSorter(list) {
@@ -139,113 +136,105 @@ function listToSorter(list) {
 	return sorter;
 }
 
-function getNextComparison(request, response, next) {
-	return List.findOne({
+async function getNextComparison(request, response) {
+	const list = await List.findOne({
 		_id: request.params.list,
 		owner: request.user._id,
-	}).then(list => {
-		const sorter = listToSorter(list);
-		const question = sorter.getQuestion();
-		if (!question) return response.redirect('/list/' + request.params.list + '#sorted-tab');
-		return response.render('comparisons', {
-			url: request.url,
-			user: request.user,
-			list,
-			listProgress: calculateProgress(sorter),
-			comparison: {
-				a: list.items[question[0]],
-				b: list.items[question[1]],
-			}
-		});
-	}).catch(next);
+	});
+	const sorter = listToSorter(list);
+	const question = sorter.getQuestion();
+	if (!question) return response.redirect('/list/' + request.params.list + '#sorted-tab');
+	return response.render('comparisons', {
+		url: request.url,
+		user: request.user,
+		list,
+		listProgress: calculateProgress(sorter),
+		comparison: {
+			a: list.items[question[0]],
+			b: list.items[question[1]],
+		}
+	});
 }
 
 function logout(request, response, next) {
 	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
 
-function signup(request, response, next) {
-	return User.findOne({
+async function signup(request, response, next) {
+	const existing = await User.findOne({
 		username: new RegExp('^' + request.body.username + '$', 'i'),
-	}).then(async existing => {
-		if (existing) {
-			return response.render('signup', {
-				url: request.url,
-				user: request.user,
-				message: 'Username already exists'
-			});
-		}
-		const userData = {
-			username: request.body.username,
-			password: await bcrypt.hash(request.body.password, 10),
-		};
+	});
 
-		const user = await new User(userData).save();
-
-		await List.updateMany({
-			owner: request.user._id
-		}, {
-			$set: {
-				owner: user._id
-			}
+	if (existing) {
+		return response.render('signup', {
+			url: request.url,
+			user: request.user,
+			message: 'Username already exists'
 		});
+	}
+	const userData = {
+		username: request.body.username,
+		password: await bcrypt.hash(request.body.password, 10),
+	};
 
-		const lastModifiedID = getLastModifiedList(await List.find({
-			owner: user._id
-		}));
+	const user = await new User(userData).save();
 
-		request.login(user, err => {
-			if (err) return next(err);
-
-			if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
-			return response.redirect('/');
-		});
-	}).catch(next);
-}
-
-function login(request, response, next) {
-	List.updateMany({ owner: request.oldSessionId }, {
+	await List.updateMany({
 		owner: request.user._id
-	}).then(async () => {
-		const lastModifiedID = getLastModifiedList(await List.find({
-			owner: request.user._id
-		}));
+	}, {
+		$set: {
+			owner: user._id
+		}
+	});
+
+	const lastModifiedID = getLastModifiedList(await List.find({
+		owner: user._id
+	}));
+
+	request.login(user, err => {
+		if (err) return next(err);
+
 		if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
 		return response.redirect('/');
-	}).catch(next);
+	});
 }
 
-function deleteList(request, response, next) {
-	return List.deleteOne({
-		_id: request.params.list,
-		owner: request.user._id,
-	}).then(() =>
-		response.redirect('/')
-	).catch(next);
+async function login(request, response) {
+	await List.updateMany({ owner: request.oldSessionId }, {
+		owner: request.user._id
+	});
+
+	const lastModifiedID = getLastModifiedList(await List.find({
+		owner: request.user._id
+	}));
+	if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
+	return response.redirect('/');
 }
 
-function deleteItem(request, response, next) {
-	return List.findOneAndUpdate({
+async function deleteList(request, response) {
+	await List.deleteOne({
 		_id: request.params.list,
 		owner: request.user._id,
-	}, {
-		$pull: {
-			items: { _id: request.params.item },
-		},
-		$unset: {
-			[`comparisons.${request.params.item}`]: 1,
-		}
-	}).then(({ comparisons }) => {
-		const $unset = generateNestedUnsets(request.params.item, comparisons);
-		return Object.keys($unset).length ? List.updateOne({
-			_id: request.params.list,
-			owner: request.user._id,
-		}, {
-			$unset,
-		}) : null;
-	}).then(() =>
-		response.redirect('/list/' + request.params.list + '#unsorted-tab')
-	).catch(next);
+	});
+
+	response.redirect('/');
+}
+
+async function deleteItem(request, response) {
+	const filter = {
+		_id: request.params.list,
+		owner: request.user._id,
+	};
+
+	const { comparisons } = await List.findOneAndUpdate(filter, {
+		$pull: { items: { _id: request.params.item } },
+		$unset: { [`comparisons.${request.params.item}`]: 1 }
+	});
+
+	const $unset = generateNestedUnsets(request.params.item, comparisons);
+	if (Object.keys($unset).length) await List.updateOne(filter, { $unset });
+
+	response.redirect('/list/' + request.params.list + '#unsorted-tab');
 }
 
 function generateNestedUnsets(deleting, comparisons) {
@@ -258,55 +247,49 @@ function generateNestedUnsets(deleting, comparisons) {
 	return $unset;
 }
 
-function resetItem(request, response, next) {
-	return List.findOneAndUpdate({
+async function resetItem(request, response) {
+	const filter = {
 		_id: request.params.list,
 		owner: request.user._id,
-	}, {
-		$unset: {
-			[`comparisons.${request.params.item}`]: 1,
-		}
-	}).then(({ comparisons }) => {
-		const $unset = generateNestedUnsets(request.params.item, comparisons);
+	};
 
-		return Object.keys($unset).length ? List.updateOne({
-			_id: request.params.list,
-			owner: request.user._id,
-		}, {
-			$unset
-		}) : null;
-	})
-		.then(() => response.redirect('/list/' + request.params.list + '#sorted-tab'))
-		.catch(next);
+	const { comparisons } = await List.findOneAndUpdate(filter, {
+		$unset: { [`comparisons.${request.params.item}`]: 1 }
+	});
+
+	const $unset = generateNestedUnsets(request.params.item, comparisons);
+	if (Object.keys($unset).length) await List.updateOne(filter, { $unset });
+
+	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-function resetComparison(request, response, next) {
-	return List.findOneAndUpdate({
+async function resetComparison(request, response) {
+	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$unset: {
 			[`comparisons.${request.params.a}.${request.params.b}`]: 1,
 		}
-	})
-		.then(() => response.redirect('/list/' + request.params.list + '#comparisons-tab'))
-		.catch(next);
+	});
+
+	response.redirect('/list/' + request.params.list + '#comparisons-tab');
 }
 
-function resetListComparisons(request, response, next) {
-	return List.findOneAndUpdate({
+async function resetListComparisons(request, response) {
+	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
 	}, {
 		$set: {
 			comparisons: {},
 		}
-	}).then(() =>
-		response.redirect('/list/' + request.params.list + '#sorted-tab')
-	).catch(next);
+	});
+
+	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-function patchList(request, response, next) {
+async function patchList(request, response, next) {
 	if (request.body.name === '') return getList(request, response, next, { message: 'New list name cannot be empty' });
 
 	const updateFilter = {
@@ -326,36 +309,36 @@ function patchList(request, response, next) {
 
 	Object.assign(updateFilter.$set, request.body);
 
-	return List.updateOne({
+	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
-	}, updateFilter).then(() =>
-		response.redirect('/list/' + request.params.list + '#sorted-tab')
-	).catch(next);
+	}, updateFilter);
+
+	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-function renderItemRenamePage(request, response, next) {
-	return List.findOne({
+async function renderItemRenamePage(request, response) {
+	const list = await List.findOne({
 		_id: request.params.list,
 		owner: request.user._id,
-	}).then(list => {
-		if (!list) return response.redirect('/');
-		const itemID = request.params.item;
-		const item = list.items.find(item => item._id.equals(itemID));
-		if (!item) return response.redirect('/');
-		return response.render('rename-item', {
-			url: request.url,
-			user: request.user,
-			list: list,
-			item,
-			...arguments[3] || {}
-		});
-	}).catch(next);
+	});
+
+	if (!list) return response.redirect('/');
+	const itemID = request.params.item;
+	const item = list.items.find(item => item._id.equals(itemID));
+	if (!item) return response.redirect('/');
+	return response.render('rename-item', {
+		url: request.url,
+		user: request.user,
+		list: list,
+		item,
+		...arguments[3] || {}
+	});
 }
 
-function patchItem(request, response, next) {
+async function patchItem(request, response, next) {
 	if (request.body.name === '') return renderItemRenamePage(request, response, next, { message: 'New item name cannot be empty' });
-	return List.updateOne({
+	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
 		items: { $elemMatch: { _id: request.params.item } }
@@ -363,9 +346,9 @@ function patchItem(request, response, next) {
 		$set: {
 			'items.$.name': request.body.name
 		}
-	}).then(() =>
-		response.redirect('/list/' + request.params.list + '#unsorted-tab')
-	).catch(next);
+	});
+
+	response.redirect('/list/' + request.params.list + '#unsorted-tab');
 }
 
 module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, compareItems, getNextComparison, getList, homepage, lists, renderItemRenamePage, patchItem, patchList };

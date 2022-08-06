@@ -1,9 +1,9 @@
-const express = require('express');
+const PromiseRouter = require('express-promise-router');
 const passport = require('passport');
 const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID } = require('./constants');
 
 const { homepage, lists, createList, createItems, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem, resetListComparisons, resetComparison, renderItemRenamePage, patchItem, patchList } = require('./controllers.js');
-const router = express.Router();
+const router = PromiseRouter();
 
 router.use((request, _, next) => {
 	if (!request.user) request.user = { _id: request.session.id };
