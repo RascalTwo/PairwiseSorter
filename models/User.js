@@ -10,6 +10,9 @@ const ConnectedProvidersSchema = new Schema({
 	githubId: {
 		type: String,
 	},
+	twitterId: {
+		type: String,
+	},
 }, { timestamps: false, _id: false });
 
 const userSchema = new Schema({

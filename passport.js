@@ -3,8 +3,9 @@ const LocalStrategy = require('passport-local');
 const GoogleStrategy = require('passport-google-oauth20');
 const DiscordStrategy = require('passport-discord').Strategy;
 const GithubStrategy = require('passport-github2').Strategy;
+const TwitterStrategy = require('passport-twitter').Strategy;
 const bcrypt = require('bcrypt');
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = require('./constants');
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET } = require('./constants');
 const User = require('./models/User');
 
 
@@ -58,7 +59,6 @@ if (DISCORD_CLIENT_ID) passport.use(new DiscordStrategy({
 	callbackURL: '/oauth2/redirect/discord',
 	passReqToCallback: true,
 	scope: ['identify'],
-	passReqToCallback: true
 }, createOAuthVerification('discord')));
 
 if (GITHUB_CLIENT_ID) passport.use(new GithubStrategy({
@@ -67,6 +67,13 @@ if (GITHUB_CLIENT_ID) passport.use(new GithubStrategy({
 	callbackURL: '/oauth2/redirect/github',
 	passReqToCallback: true
 }, createOAuthVerification('github')));
+
+if (TWITTER_CONSUMER_KEY) passport.use(new TwitterStrategy({
+	consumerKey: TWITTER_CONSUMER_KEY,
+	consumerSecret: TWITTER_CONSUMER_SECRET,
+	callbackURL: '/oauth2/redirect/twitter',
+	passReqToCallback: true
+}, createOAuthVerification('twitter')));
 
 module.exports = (app) => {
 	app.use(passport.initialize());

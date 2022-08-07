@@ -11,6 +11,8 @@ module.exports = [
 	['DISCORD_CLIENT_SECRET'],
 	['GITHUB_CLIENT_ID'],
 	['GITHUB_CLIENT_SECRET'],
+	['TWITTER_CONSUMER_KEY'],
+	['TWITTER_CONSUMER_SECRET']
 ].reduce((acc, [key, defaultValue]) => {
 	acc[key] = process.env[key] || defaultValue;
 	return acc;
