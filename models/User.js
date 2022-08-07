@@ -13,6 +13,9 @@ const ConnectedProvidersSchema = new Schema({
 	twitterId: {
 		type: String,
 	},
+	twitchId: {
+		type: String,
+	},
 }, { timestamps: false, _id: false });
 
 const userSchema = new Schema({

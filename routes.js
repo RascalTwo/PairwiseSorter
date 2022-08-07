@@ -1,6 +1,6 @@
 const PromiseRouter = require('express-promise-router');
 const passport = require('passport');
-const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID, TWITTER_CONSUMER_KEY } = require('./constants');
+const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID, TWITTER_CONSUMER_KEY, TWITCH_CLIENT_ID } = require('./constants');
 
 const { homepage, lists, createList, createItems, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem, resetListComparisons, resetComparison, renderItemRenamePage, patchItem, patchList } = require('./controllers.js');
 const router = PromiseRouter();
@@ -83,11 +83,21 @@ if (hasTwitter) {
 	);
 }
 
+const hasTwitch = !!TWITCH_CLIENT_ID;
+if (hasTwitch) {
+	router.get('/login/twitch', passport.authenticate('twitch'));
+	router.get('/oauth2/redirect/twitch',
+		passport.authenticate('twitch', { failureRedirect: '/login', failureMessage: true }),
+		(_, response) => response.redirect('/')
+	);
+}
+
 const oauthAvailable = {
 	google: hasGoogle,
 	discord: hasDiscord,
 	github: hasGithub,
-	twitter: hasTwitter
+	twitter: hasTwitter,
+	twitch: hasTwitch
 };
 
 router.route('/login')
