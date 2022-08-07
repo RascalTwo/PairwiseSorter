@@ -1,24 +1,35 @@
 const { model, Schema } = require('mongoose');
 
-module.exports = model('User', new Schema({
+const ConnectedProvidersSchema = new Schema({
+	googleId: {
+		type: String,
+	},
+	discordId: {
+		type: String,
+	},
+	githubId: {
+		type: String,
+	},
+}, { timestamps: false, _id: false });
+
+const userSchema = new Schema({
 	username: {
 		type: String,
-		required: true,
 		minLength: 3
 	},
 	password: {
 		type: String,
 	},
 	connected: {
-		googleId: {
-			type: String,
-		},
-		discordId: {
-			type: String,
-		},
-		githubId: {
-			type: String,
-		},
-		default: {}
+		type: ConnectedProvidersSchema,
+		default: () => ({})
 	}
-}, { timestamps: { createdAt: true } }), 'users');
+}, { timestamps: { createdAt: true } });
+
+for (const method of ['updateOne', 'updateMany', 'findOneAndUpdate']) userSchema.pre(method, function (next) {
+	this.options.runValidators = true;
+	next();
+});
+
+
+module.exports = model('User', userSchema, 'users');

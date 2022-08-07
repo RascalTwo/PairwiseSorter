@@ -4,6 +4,6 @@ import AuthForm from './components/AuthForm';
 
 export default function SignUp(mainProps) {
 	return <Main {...mainProps}>
-		<AuthForm user={mainProps.user} text="Login" action="login" has={mainProps.has} />
+		<AuthForm user={mainProps.user} text="Login" action="login" oauthAvailable={mainProps.oauthAvailable} />
 	</Main>;
 }

@@ -24,59 +24,49 @@ passport.use(new LocalStrategy((username, password, done) => {
 	}).catch(done);
 }));
 
+
+const createOAuthVerification = slug => ({ user }, access, refresh, params, profile, done) => {
+	if (user.createdAt) {
+		user.connected[slug + 'Id'] = profile.id;
+		return user.save().then(user => done(null, user)).catch(done);
+	}
+
+	User.findOne({ [`connected.${slug}Id`]: profile.id }).then(async user => {
+		if (user) return done(null, user);
+
+		return done(null, await new User({
+			connected: {
+				[slug + 'Id']: profile.id
+			}
+		}).save());
+	}).catch(done);
+};
+
+
 if (GOOGLE_CLIENT_ID) passport.use(new GoogleStrategy({
 	clientID: GOOGLE_CLIENT_ID,
 	clientSecret: GOOGLE_CLIENT_SECRET,
 	callbackURL: '/oauth2/redirect/google',
+	passReqToCallback: true,
 	scope: ['profile'],
 	state: true
-}, (access, refresh, profile, done) => {
-	User.findOne({ 'connected.googleId': profile.id }).then(async user => {
-		if (user) return done(null, user);
-
-		return done(null, await new User({
-			username: profile.displayName,
-			connected: {
-				googleId: profile.id
-			}
-		}).save());
-	}).catch(done);
-}));
+}, createOAuthVerification('google')));
 
 if (DISCORD_CLIENT_ID) passport.use(new DiscordStrategy({
 	clientID: DISCORD_CLIENT_ID,
 	clientSecret: DISCORD_CLIENT_SECRET,
 	callbackURL: '/oauth2/redirect/discord',
+	passReqToCallback: true,
 	scope: ['identify'],
-}, (access, refresh, profile, done) => {
-	User.findOne({ 'connected.discordId': profile.id }).then(async user => {
-		if (user) return done(null, user);
-
-		return done(null, await new User({
-			username: profile.username + '#' + profile.discriminator,
-			connected: {
-				discordId: profile.id
-			}
-		}).save());
-	}).catch(done);
-}));
+	passReqToCallback: true
+}, createOAuthVerification('discord')));
 
 if (GITHUB_CLIENT_ID) passport.use(new GithubStrategy({
 	clientID: GITHUB_CLIENT_ID,
 	clientSecret: GITHUB_CLIENT_SECRET,
-	callbackURL: '/oauth2/redirect/github'
-}, (access, refresh, profile, done) => {
-	User.findOne({ 'connected.githubId': profile.id }).then(async user => {
-		if (user) return done(null, user);
-
-		return done(null, await new User({
-			username: profile.username,
-			connected: {
-				githubId: profile.id
-			}
-		}).save());
-	}).catch(done);
-}));
+	callbackURL: '/oauth2/redirect/github',
+	passReqToCallback: true
+}, createOAuthVerification('github')));
 
 module.exports = (app) => {
 	app.use(passport.initialize());

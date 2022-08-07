@@ -1,5 +1,6 @@
 import React from 'react';
 import Main from './Main';
+import Card from './components/Card';
 
 function durationToLargestUnit(duration) {
 	for (const [unit, value] of Object.entries({
@@ -19,9 +20,10 @@ export default function Index({ lists, ...mainProps}) {
 	return <Main {...mainProps}>
 		<p className="container text-center">Allows you to sort a list of items by comparing items in pairs efficiently!</p>
 		<div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-			{lists.map(list => <div key={list._id} className="col">
-				<div className="card text-center" style={{ height: '100%' }}>
-					<div className="card-header d-flex justify-content-between align-items-center">
+			{lists.map(list =>
+				<Card
+					key={list._id}
+					header={<>
 						<a href={`/list/${list._id}#sorted-tab`} className="text-truncate" data-bs-toggle="tooltip" data-bs-title={list.name} title={list.name}>{list.name}</a>
 
 						{list.items.length
@@ -31,22 +33,20 @@ export default function Index({ lists, ...mainProps}) {
 							</div>
 							: null
 						}
-					</div>
-					<div className="card-body">
-						<p className="card-text">
-							<ul className="list-group">
-								{list.order.slice(0, 3).map(i => list.items[i]).filter(Boolean).map(({ _id, name }) =>
-									<li key={_id} className="list-group-item text-truncate" data-bs-toggle="tooltip" data-bs-title={name} title={name}>{name}</li>
-								)}
-							</ul>
-						</p>
-					</div>
-					<div className="card-footer text-muted  d-flex justify-content-between align-items-center">
+					</>}
+					body={<p className="card-text">
+						<ul className="list-group">
+							{list.order.slice(0, 3).map(i => list.items[i]).filter(Boolean).map(({ _id, name }) =>
+								<li key={_id} className="list-group-item text-truncate" data-bs-toggle="tooltip" data-bs-title={name} title={name}>{name}</li>
+							)}
+						</ul>
+					</p>}
+
+					footer={<>
 						<span></span>
 						{new Intl.RelativeTimeFormat().format(...durationToLargestUnit(Math.floor(((now - list.updatedAt.getTime()) / 1000))))}
-					</div>
-				</div>
-			</div>)}
+					</>}
+				/>)}
 		</div>
 	</Main>;
 }

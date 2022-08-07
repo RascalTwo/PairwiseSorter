@@ -182,12 +182,14 @@ async function signup(request, response, next) {
 			message: 'Username already exists'
 		});
 	}
-	const userData = {
-		username: request.body.username,
-		password: await bcrypt.hash(request.body.password, 10),
-	};
 
-	const user = await new User(userData).save();
+	let user;
+	if (request.user.hasOnlyOAuth){
+		request.user.username = request.body.username;
+		user = await request.user.save();
+	} else {
+		user = await new User({ username: request.body.username, password: await bcrypt.hash(request.body.password, 10) }).save();
+	}
 
 	await List.updateMany({
 		owner: request.user._id

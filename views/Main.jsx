@@ -36,8 +36,11 @@ export default function Main({ url, user, message, children }) {
 							<ul className="navbar-nav">
 								<NavLink url={url} href="/" content="Home" />
 								<NavLink url={url} href="/lists" content="Lists" />
-								{user.username
-									? <NavLink url={url} href="/logout" content={`Logout of ${user.username}`} />
+								{user.createdAt
+									? <>
+										<NavLink url={url} href="/profile" content="Profile" />
+										<NavLink url={url} href="/logout" content={`Logout${user.hasOnlyOAuth ? '' : ` of ${user.username}`}`} />
+									</>
 									: <>
 										<NavLink url={url} href="/login" content="Login" />
 										<NavLink url={url} href="/signup" content="Sign Up" />

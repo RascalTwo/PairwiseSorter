@@ -8,6 +8,14 @@ const router = PromiseRouter();
 router.use((request, _, next) => {
 	if (!request.user) request.user = { _id: request.session.id };
 	request.oldSessionId = request.session.id;
+	request.user.hasOnlyOAuth = !request.user.username && request.user.createdAt;
+	next();
+});
+
+router.get('/logout', logout);
+
+router.use((request, response, next) => {
+	if (request.user.hasOnlyOAuth && request.url !== '/signup') return response.redirect('/signup');
 	next();
 });
 
@@ -66,17 +74,17 @@ if (hasGithub) {
 	);
 }
 
-router.get('/logout', logout);
+const oauthAvailable = {
+	google: hasGoogle,
+	discord: hasDiscord,
+	github: hasGithub
+};
 
 router.route('/login')
 	.get((request, response) => response.render('login', {
 		url: request.url,
 		user: request.user,
-		has: {
-			google: hasGoogle,
-			discord: hasDiscord,
-			github: hasGithub
-		}
+		oauthAvailable
 	}))
 	.post(passport.authenticate('local', { failureRedirect: '/login' }), login);
 
@@ -84,13 +92,25 @@ router.route('/signup')
 	.get((request, response) => response.render('signup', {
 		url: request.url,
 		user: request.user,
-		has: {
-			google: hasGoogle,
-			discord: hasDiscord,
-			github: hasGithub
-		}
+		oauthAvailable
 	}))
 	.post(signup);
+
+router.get('/profile', (request, response) => response.render('profile', {
+	url: request.url,
+	user: request.user,
+	oauthAvailable
+}));
+
+router.get('/logout/:provider', async (request, response) => {
+	const { provider } = request.params;
+	if (provider in oauthAvailable) {
+		request.user.connected[provider + 'Id'] = undefined;
+		await request.user.save();
+		return response.redirect('/');
+	}
+	return response.status(404).send();
+});
 
 
 module.exports = router;
