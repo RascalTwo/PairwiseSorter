@@ -16,6 +16,9 @@ module.exports = model('User', new Schema({
 		discordId: {
 			type: String,
 		},
+		githubId: {
+			type: String,
+		},
 		default: {}
 	}
 }, { timestamps: { createdAt: true } }), 'users');

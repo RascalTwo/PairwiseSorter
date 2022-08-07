@@ -1,6 +1,6 @@
 const PromiseRouter = require('express-promise-router');
 const passport = require('passport');
-const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID } = require('./constants');
+const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID } = require('./constants');
 
 const { homepage, lists, createList, createItems, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem, resetListComparisons, resetComparison, renderItemRenamePage, patchItem, patchList } = require('./controllers.js');
 const router = PromiseRouter();
@@ -57,6 +57,15 @@ if (hasDiscord) {
 	);
 }
 
+const hasGithub = !!GITHUB_CLIENT_ID;
+if (hasGithub) {
+	router.get('/login/github', passport.authenticate('github'));
+	router.get('/oauth2/redirect/github',
+		passport.authenticate('github', { failureRedirect: '/login', failureMessage: true }),
+		(_, response) => response.redirect('/')
+	);
+}
+
 router.get('/logout', logout);
 
 router.route('/login')
@@ -65,7 +74,8 @@ router.route('/login')
 		user: request.user,
 		has: {
 			google: hasGoogle,
-			discord: hasDiscord
+			discord: hasDiscord,
+			github: hasGithub
 		}
 	}))
 	.post(passport.authenticate('local', { failureRedirect: '/login' }), login);
@@ -76,7 +86,8 @@ router.route('/signup')
 		user: request.user,
 		has: {
 			google: hasGoogle,
-			discord: hasDiscord
+			discord: hasDiscord,
+			github: hasGithub
 		}
 	}))
 	.post(signup);

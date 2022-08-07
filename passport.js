@@ -2,8 +2,9 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const GoogleStrategy = require('passport-google-oauth20');
 const DiscordStrategy = require('passport-discord').Strategy;
+const GithubStrategy = require('passport-github2').Strategy;
 const bcrypt = require('bcrypt');
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET } = require('./constants');
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = require('./constants');
 const User = require('./models/User');
 
 
@@ -55,6 +56,23 @@ if (DISCORD_CLIENT_ID) passport.use(new DiscordStrategy({
 			username: profile.username + '#' + profile.discriminator,
 			connected: {
 				discordId: profile.id
+			}
+		}).save());
+	}).catch(done);
+}));
+
+if (GITHUB_CLIENT_ID) passport.use(new GithubStrategy({
+	clientID: GITHUB_CLIENT_ID,
+	clientSecret: GITHUB_CLIENT_SECRET,
+	callbackURL: '/oauth2/redirect/github'
+}, (access, refresh, profile, done) => {
+	User.findOne({ 'connected.githubId': profile.id }).then(async user => {
+		if (user) return done(null, user);
+
+		return done(null, await new User({
+			username: profile.username,
+			connected: {
+				githubId: profile.id
 			}
 		}).save());
 	}).catch(done);
