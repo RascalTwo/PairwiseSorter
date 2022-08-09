@@ -166,7 +166,8 @@ async function getNextComparison(request, response) {
 	});
 }
 
-function logout(request, response, next) {
+async function logout(request, response, next) {
+	if (request.user.hasOnlyOAuth) await request.user.remove();
 	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
 

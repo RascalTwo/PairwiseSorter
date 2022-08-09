@@ -28,13 +28,16 @@ passport.use(new LocalStrategy((username, password, done) => {
 
 
 const createOAuthVerification = slug => ({ user }, access, refresh, params, profile, done) => {
-	if (user.createdAt) {
-		user.connected[slug + 'Id'] = profile.id;
-		return user.save().then(user => done(null, user)).catch(done);
-	}
+	User.findOne({ [`connected.${slug}Id`]: profile.id }).then(async foundUser => {
+		if (user.createdAt) {
+			if (foundUser) {
+				return done(`This ${slug} account is already connected to another local account`);
+			}
+			user.connected[slug + 'Id'] = profile.id;
+			return user.save().then(user => done(null, user)).catch(done);
+		}
 
-	User.findOne({ [`connected.${slug}Id`]: profile.id }).then(async user => {
-		if (user) return done(null, user);
+		if (foundUser) return done(null, foundUser);
 
 		return done(null, await new User({
 			connected: {
