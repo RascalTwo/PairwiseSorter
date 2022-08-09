@@ -5,8 +5,9 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const GithubStrategy = require('passport-github2').Strategy;
 const TwitterStrategy = require('passport-twitter').Strategy;
 const TwitchStrategy = require('passport-twitch-new').Strategy;
+const DropboxStrategy = require('passport-dropbox-oauth2').Strategy;
 const bcrypt = require('bcrypt');
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET } = require('./config/constants');
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, DROPBOX_CLIENT_ID, DROPBOX_CLIENT_SECRET } = require('./config/constants');
 const User = require('./models/User');
 
 
@@ -86,6 +87,14 @@ if (TWITCH_CLIENT_ID) passport.use(new TwitchStrategy({
 	passReqToCallback: true,
 	scope: 'user_read'
 }, createOAuthVerification('twitch')));
+
+if (DROPBOX_CLIENT_ID) passport.use(new DropboxStrategy({
+	apiVersion: '2',
+	clientID: DROPBOX_CLIENT_ID,
+	clientSecret: DROPBOX_CLIENT_SECRET,
+	callbackURL: '/oauth2/redirect/dropbox',
+	passReqToCallback: true,
+}, createOAuthVerification('dropbox')));
 
 module.exports = (app) => {
 	app.use(passport.initialize());

@@ -16,6 +16,9 @@ const ConnectedProvidersSchema = new Schema({
 	twitchId: {
 		type: String,
 	},
+	dropboxId: {
+		type: String,
+	},
 }, { timestamps: false, _id: false });
 
 const userSchema = new Schema({
