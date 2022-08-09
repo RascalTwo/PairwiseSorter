@@ -11,7 +11,7 @@ let client = null;
  */
 module.exports = async (reconnect = false, options = {}) => {
 	if (!client || reconnect) {
-		if (client) await client.close();
+		if (client) await client.connection.close();
 
 		client = await mongoose.connect(CONSTANTS.MONGODB_URL, options);
 	}

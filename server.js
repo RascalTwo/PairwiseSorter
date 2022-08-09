@@ -40,7 +40,7 @@ app.use(expressSession({
 	secret: SESSION_SECRET, // TODO - move to env variable
 	resave: true,
 	saveUninitialized: true,
-	store: MongoStore.create({ mongoUrl: MONGODB_URL })
+	store: NODE_ENV === 'production' ? MongoStore.create({ mongoUrl: MONGODB_URL }) : undefined
 }));
 setupPassport(app);
 

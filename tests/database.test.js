@@ -9,6 +9,7 @@ describe('database', () => {
 	});
 
 	it('throws error', async () => {
+		CONSTANTS.MONGODB_URL = 'mongodb://localhost:27017/pairwise-sorter-test';
 		expect.assertions(1);
 		try {
 			return await getClient(true, { serverSelectionTimeoutMS: 1000 });
