@@ -167,6 +167,7 @@ async function getNextComparison(request, response) {
 }
 
 async function logout(request, response, next) {
+	if (!request.createdAt) await List.deleteMany({ owner: request.user._id });
 	if (request.user.hasOnlyOAuth) await request.user.remove();
 	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
