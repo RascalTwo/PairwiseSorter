@@ -1,4 +1,4 @@
-name: Test
+name: Test & Deploy
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     branches: [ "release" ]
 
 jobs:
-  build:
+  test-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -17,3 +17,9 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm test
+    - name: Deploy to Heroku
+      uses: AkhileshNS/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: "r2-pairwise-sorter"
+        heroku_email: ${{secrets.HEROKU_EMAIL}}
