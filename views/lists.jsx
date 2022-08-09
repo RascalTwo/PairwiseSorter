@@ -1,7 +1,7 @@
 import React from 'react';
 import Main from './Main';
 
-export default function Index({ lists, ...mainProps}) {
+export default function Lists({ lists, ...mainProps}) {
 	return <Main {...mainProps}>
 		<form action="/list" method="POST">
 			<label htmlFor="name" className="form-label">New List Name</label>
