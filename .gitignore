@@ -1,3 +1,5 @@
 node_modules
 database
 coverage
+config/.env*
+!config/.env.example

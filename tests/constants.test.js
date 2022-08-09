@@ -1,4 +1,4 @@
-const { PORT, MONGODB_URL, JWT_SECRET } = require('../constants.js');
+const { PORT, MONGODB_URL, JWT_SECRET } = require('../config/constants.js');
 
 describe('constant values', () => {
 	test('PORT default', () => {

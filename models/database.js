@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const CONSTANTS = require('../constants.js');
+const CONSTANTS = require('../config/constants.js');
 
 let client = null;
 

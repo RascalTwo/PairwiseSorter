@@ -1,5 +1,5 @@
 const server = require('./server.js');
-const { PORT } = require('./constants.js');
+const { PORT } = require('./config/constants.js');
 const getClient = require('./models/database.js');
 
 

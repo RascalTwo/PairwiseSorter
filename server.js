@@ -7,7 +7,7 @@ const { ObjectId } = require('mongodb');
 const MongoStore = require('connect-mongo');
 const expressSession = require('express-session');
 const setupPassport = require('./passport');
-const { SESSION_SECRET, MONGODB_URL, NODE_ENV } = require('./constants');
+const { SESSION_SECRET, MONGODB_URL, NODE_ENV } = require('./config/constants');
 
 const app = express();
 

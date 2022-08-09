@@ -1,7 +1,7 @@
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const { ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
-const CONSTANTS = require('../constants.js');
+const CONSTANTS = require('../config/constants.js');
 
 module.exports.createMemoryServer = function createMemoryServer(constants){
 	let mongod = null;

@@ -2,7 +2,7 @@ const { ObjectId } = require('mongodb');
 
 const jwt = require('jsonwebtoken');
 
-const { JWT_SECRET } = require('./constants.js');
+const { JWT_SECRET } = require('./config/constants.js');
 
 module.exports.parseToken = parseToken;
 function parseToken(request, _, next) {

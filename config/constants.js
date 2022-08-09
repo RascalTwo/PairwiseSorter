@@ -1,4 +1,8 @@
-require('dotenv').config();
+const NODE_ENV = process.env.NODE_ENV;
+
+const { config } = require('dotenv');
+
+for (const filenames of [`config/.env.${NODE_ENV}`, 'config/.env']) config({ path: filenames });
 
 module.exports = [
 	['PORT', 1337],

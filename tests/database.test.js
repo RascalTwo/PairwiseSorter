@@ -1,4 +1,4 @@
-const CONSTANTS = require('../constants.js');
+const CONSTANTS = require('../config/constants.js');
 const getClient = require('../models/database.js');
 const { createMemoryServer } = require('./helpers.js');
 

@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../../server.js');
 const getClient = require('../../models/database.js');
-const CONSTANTS = require('../../constants.js');
+const CONSTANTS = require('../../config/constants.js');
 const { createMemoryServer } = require('../helpers.js');
 describe('homepage', () => {
 	createMemoryServer(CONSTANTS);
