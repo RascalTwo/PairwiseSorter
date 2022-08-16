@@ -4,3 +4,5 @@ coverage
 dev-sessions
 config/.env*
 !config/.env.example
+cypress/videos
+cypress/downloads
