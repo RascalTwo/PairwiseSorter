@@ -3,7 +3,7 @@
 		"no-unused-vars": [
 			"warn",
 			{
-				"varsIgnorePattern": "(React|Main|NavLink|AuthForm|Title|RenameForm|SortedList|UnsortedList|ComparisonsList|Card)"
+				"varsIgnorePattern": "(React|Main|NavLink|AuthForm|Title|RenameForm|SortedList|UnsortedList|ComparisonsList|Card|TimeAgo)"
 			}
 		]
 	}

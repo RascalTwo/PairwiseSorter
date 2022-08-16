@@ -1,22 +1,10 @@
 import React from 'react';
 import Main from './Main';
 import Card from './components/Card';
+import TimeAgo from './components/TimeAgo';
 
-function durationToLargestUnit(duration) {
-	for (const [unit, value] of Object.entries({
-		'year': Math.floor(duration / 31536000),
-		'month': Math.floor((duration % 31536000) / 2628000),
-		'day': Math.floor((duration % 2628000) / 86400),
-		'hour': Math.floor((duration % 86400) / 3600),
-		'minute': Math.floor((duration % 3600) / 60),
-		'second': Math.floor(duration % 60),
-	})) {
-		if (value) return [-value, unit];
-	}
-}
 
 export default function Index({ lists, ...mainProps}) {
-	const now = Date.now();
 	return <Main {...mainProps}>
 		<p className="container text-center">Allows you to sort a list of items by comparing items in pairs efficiently!</p>
 		<div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
@@ -44,7 +32,7 @@ export default function Index({ lists, ...mainProps}) {
 
 					footer={<>
 						<span></span>
-						{new Intl.RelativeTimeFormat().format(...durationToLargestUnit(Math.floor(((now - list.updatedAt.getTime()) / 1000))))}
+						<TimeAgo date={list.updatedAt} />
 					</>}
 				/>)}
 		</div>

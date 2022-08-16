@@ -5,6 +5,7 @@ import RenameForm from './components/RenameForm';
 import SortedList from './components/SortedList';
 import UnsortedList from './components/UnsortedList';
 import ComparisonsList from './components/ComparisonsList';
+import TimeAgo from './components/TimeAgo';
 
 export default function Index({ list, order, isOwner, listProgress, denormalizedComparisons, ...mainProps }) {
 	return <Main {...mainProps}>
@@ -21,6 +22,17 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 			: null
 		}
 		<Title list={list} listProgress={listProgress} />
+
+		<div className="float-end">
+			Created At: <time datetime={list.updatedAt.toISOString()}>{list.createdAt.toLocaleString()}</time>
+			{list.createdAt.getTime() !== list.updatedAt.getTime()
+				? <>
+					<br/>
+					Updated At: <TimeAgo date={list.updatedAt} />
+				</>
+				: null
+			}
+		</div>
 
 		{isOwner
 			? <>
