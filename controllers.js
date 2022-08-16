@@ -80,6 +80,40 @@ async function createItems(request, response, next) {
 
 const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sorter.size : 1;
 
+function getSortStates(list){
+	const sorter = new PairwiseSorter(list.items.length);
+
+	const states = [];
+
+	for (let question = sorter.getQuestion(); question; question = sorter.getQuestion()) {
+		states.push({ order: sorter.getOrder(), current: { ...sorter.current }});
+		const [ai, bi] = question;
+		const a = list.items[ai]._id.toString();
+		const b = list.items[bi]._id.toString();
+		const current = { ...sorter.current };
+		if (list.comparisons.has(a) && list.comparisons.get(a).has(b)) {
+			const result = list.comparisons.get(a).get(b).result;
+			if (result === -1) current.max = current.try;
+			else current.min = current.try + 1;
+
+			sorter.addAnswer(result);
+		} else if (list.comparisons.has(b) && list.comparisons.get(b).has(a)) {
+			const result = list.comparisons.get(b).get(a).result;
+			if (result === -1) current.max = current.try;
+			else current.min = current.try + 1;
+
+			sorter.addAnswer(result);
+		} else {
+			break;
+		}
+		states.push({ order: sorter.getOrder(), current});
+	}
+
+	states.push({ order: sorter.getOrder() });
+
+	return states;
+}
+
 async function getList(request, response) {
 	const list = await List.findOne({ _id: request.params.list });
 	if (!list) return response.status(404).end();
@@ -107,6 +141,7 @@ async function getList(request, response) {
 		denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
 		listProgress: calculateProgress(sorter),
 		order: sorter.getOrder(),
+		sortStates: getSortStates(list),
 		...arguments[3] || {}
 	});
 }

@@ -1,3 +1,4 @@
+import autoAnimate from '/autoAnimate.js';
 
 const links = [...document.querySelectorAll('a[href^="#"]')];
 
@@ -26,3 +27,50 @@ links.forEach(link => link.addEventListener('click', event => {
 
 	markActive(link);
 }));
+
+
+(() => {
+
+	const sorting = document.querySelector('#sorting-list');
+	const list = JSON.parse(sorting.dataset.list);
+	const sortStates = JSON.parse(sorting.dataset.sortStates);
+
+	let playing = false;
+	async function playAnimation() {
+		if (playing) {
+			playing = false;
+			return setTimeout(playAnimation, 1000);
+		}
+		playing = true;
+		this.textContent = 'Replay Animaion';
+	
+		sorting.innerHTML = '';
+		for (const state of sortStates) {
+			for (let i = 0; i <= state.order.length; i++) {
+				const index = i < state.order.length ? state.order[i] : -1;
+				let li;
+				if (sorting.children[i]?.dataset.index == index) {
+					li = sorting.children[i];
+				} else {
+					li = document.createElement('li');
+					li.dataset.index = index;
+					li.textContent = list.items[index]?.name || '';
+					sorting.insertBefore(li, sorting.children[i]);
+				}
+				li.dataset.sorting = !!state.current;
+				li.dataset.possible = state.current ? i >= state.current.min && i <= state.current.max : false;
+				li.dataset.selected = state.current ? i === state.current.min && i === state.current.max : false;
+				li.dataset.comparing = state.current ? i === state.current.try : false;
+			}
+
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			if (!playing) return;
+		}
+
+		playing = false;
+		this.textContent = 'Play Animaion';
+	}
+
+	autoAnimate(sorting);
+	document.querySelector('#sorting-container button').addEventListener('click', playAnimation);
+})();

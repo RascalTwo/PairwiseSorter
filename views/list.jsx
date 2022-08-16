@@ -6,8 +6,9 @@ import SortedList from './components/SortedList';
 import UnsortedList from './components/UnsortedList';
 import ComparisonsList from './components/ComparisonsList';
 import TimeAgo from './components/TimeAgo';
+import Card from './components/Card';
 
-export default function Index({ list, order, isOwner, listProgress, denormalizedComparisons, ...mainProps }) {
+export default function Index({ list, order, isOwner, listProgress, denormalizedComparisons, sortStates, ...mainProps }) {
 	return <Main {...mainProps}>
 		{isOwner
 			? <div className="btn-group float-end" role="group" aria-label="List Actions">
@@ -66,6 +67,19 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 		<UnsortedList list={list} isOwner={isOwner} />
 		<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} />
 
-		<script src="/list.js"></script>
+		<div id="sorting-container">
+			<Card
+				header="Sorting Animation"
+				body={<ul
+					id="sorting-list"
+					data-sort-states={JSON.stringify(sortStates)}
+					data-list={JSON.stringify(list)}
+					data-denormalized-comparisons={JSON.stringify([...denormalizedComparisons].reverse())}
+				></ul>}
+				footer={<button className="btn btn-primary">Play Animation</button>}
+			/>
+		</div>
+
+		<script src="/list.js" type="module"></script>
 	</Main>;
 }

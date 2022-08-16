@@ -55,3 +55,43 @@ kbd {
 		color: inherit;
 		transform: translateX(-50%) scale(1.1);
 	}
+
+#sorting-container {
+	padding: 2.5rem;
+}
+
+	#sorting-container .card {
+		width: max-content;
+		margin: auto;
+	}
+
+		#sorting-list {
+			list-style: none;
+			padding: 0;
+		}
+
+			#sorting-list li {
+				display: inline-block;
+			}
+
+				#sorting-list li::before {
+					content: "|";
+					padding: 0.1rem;
+					color: red;
+				}
+
+				#sorting-list li[data-sorting="false"]::before {
+					color: grey;
+				}
+
+				#sorting-list li[data-sorting="true"][data-possible="true"]::before {
+					color: green;
+				}
+
+			#sorting-list li[data-sorting="true"][data-comparing="true"] {
+				color: yellow;
+			}
+
+				#sorting-list li[data-sorting="true"][data-selected="true"]::before {
+					color: yellow;
+				}
