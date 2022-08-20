@@ -1,12 +1,12 @@
 {
   "name": "pairwisesorter",
-  "version": "1.21.4",
+  "version": "1.21.5",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env NODE_ENV=testing jest",
-    "e2e-test": "cross-env NODE_ENV=testing concurrently \"node index.js\" \"wait-on tcp:1337 && cypress run\"",
-    "test-all": "npm run test && npm run e2e-test",
+    "unit-test": "cross-env NODE_ENV=testing jest",
+    "e2e-test": "cross-env NODE_ENV=testing start-server-and-test \"node scripts/launch-test-server.js\" 1337 \"cypress run\"",
+    "test": "npm run unit-test && npm run e2e-test",
     "lint": "eslint .",
     "start": "cross-env NODE_ENV=production node index.js",
     "dev": "cross-env NODE_ENV=development concurrently \"nodemon --ignore dev-sessions index.js\" \"wait-on tcp:1337 && browser-sync start --proxy localhost:1337 --files 'views,public'\"",
@@ -54,6 +54,7 @@
     "nodemon": "^2.0.19",
     "session-file-store": "^1.5.0",
     "simple-git": "^3.11.0",
+    "start-server-and-test": "^1.14.0",
     "supertest": "^6.2.4",
     "wait-on": "^6.0.1"
   }
