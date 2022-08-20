@@ -44,6 +44,15 @@ app.use(expressSession({
 }));
 setupPassport(app);
 
-app.use(require('./routes.js'));
+app.use((request, _, next) => {
+	if (!request.user) request.user = { _id: request.session.id };
+	request.oldSessionId = request.session.id;
+	request.user.hasOnlyOAuth = !request.user.username && request.user.createdAt;
+	next();
+});
+
+app.use(require('./routers/index.js'));
+app.use(require('./routers/user.js'));
+app.use(require('./routers/list.js'));
 
 module.exports = app;

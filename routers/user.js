@@ -1,50 +1,15 @@
 const PromiseRouter = require('express-promise-router');
 const passport = require('passport');
-const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID, TWITTER_CONSUMER_KEY, TWITCH_CLIENT_ID, DROPBOX_CLIENT_ID } = require('./config/constants');
+const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID, TWITTER_CONSUMER_KEY, TWITCH_CLIENT_ID, DROPBOX_CLIENT_ID } = require('../config/constants');
 
-const { homepage, lists, createList, createItems, compareItems, getList, getNextComparison, logout, login, signup, deleteList, deleteItem, resetItem, resetListComparisons, resetComparison, renderItemRenamePage, patchItem, patchList } = require('./controllers.js');
+const { logout, login, signup } = require('../controllers/user.js');
+const { redirectPartialOAuthUsers } = require('../middlewares/index.js');
 const router = PromiseRouter();
 
-router.use((request, _, next) => {
-	if (!request.user) request.user = { _id: request.session.id };
-	request.oldSessionId = request.session.id;
-	request.user.hasOnlyOAuth = !request.user.username && request.user.createdAt;
-	next();
-});
 
 router.get('/logout', logout);
 
-router.use((request, response, next) => {
-	if (request.user.hasOnlyOAuth && request.url !== '/signup') return response.redirect('/signup');
-	next();
-});
-
-router.get('/', homepage);
-router.get('/lists', lists);
-
-
-router.post('/list', createList);
-
-router.route('/list/:list')
-	.get(getList)
-	.post(createItems)
-	.patch(patchList)
-	.delete(deleteList);
-
-router.route('/list/:list/comparisons')
-	.get(getNextComparison)
-	.put(resetListComparisons);
-
-router.route('/list/:list/:item')
-	.get(renderItemRenamePage)
-	.patch(patchItem)
-	.delete(deleteItem);
-
-router.put('/list/:list/:item/comparisons', resetItem);
-
-router.route('/list/:list/:a/:b')
-	.post(compareItems)
-	.delete(resetComparison);
+router.use(redirectPartialOAuthUsers);
 
 const hasGoogle = !!GOOGLE_CLIENT_ID;
 

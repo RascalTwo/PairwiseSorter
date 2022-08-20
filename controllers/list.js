@@ -1,51 +1,6 @@
-const bcrypt = require('bcrypt');
-const List = require('./models/List');
-const User = require('./models/User');
-const PairwiseSorter = require('./sorter.js');
-
-
-async function lists(request, response) {
-	const lists = await List.find({ owner: request.user._id });
-	response.render('lists', {
-		url: request.url,
-		user: request.user,
-		lists,
-		...(arguments[3] || {})
-	});
-}
-
-function getLastModifiedList(lists) {
-	const modified = {};
-	for (const list of lists) {
-		modified[list._id] = +(list.updatedAt || list.modifiedAt);
-		for (const item of list.items) {
-			modified[list._id] = Math.max(modified[list._id], +(item.updatedAt || list.modifiedAt));
-		}
-		for (const a of list.comparisons.keys()) {
-			for (const b of list.comparisons.get(a).keys()) {
-				modified[list._id] = Math.max(modified[list._id], +list.comparisons.get(a).get(b).createdAt);
-			}
-		}
-	}
-	return Object.entries(modified).sort((a, b) => b[1] - a[1])[0]?.[0];
-}
-
-async function homepage(request, response) {
-	const lists = await List.find({ public: true });
-	return response.render('index', {
-		url: request.url,
-		user: request.user,
-		lists: lists.map(list => {
-			const sorter = listToSorter(list);
-
-			return {
-				...list.toObject(),
-				progress: calculateProgress(sorter),
-				order: sorter.getOrder(),
-			};
-		})
-	});
-}
+const List = require('../models/List');
+const PairwiseSorter = require('../sorter.js');
+const { listToSorter, calculateProgress } = require('../helpers.js');
 
 async function createList(request, response, next) {
 	if (request.body.name === '') return lists(request, response, next, { message: 'List name cannot be empty' });
@@ -77,8 +32,6 @@ async function createItems(request, response, next) {
 
 	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
-
-const calculateProgress = (sorter) => sorter.size ? (sorter.current.item) / sorter.size : 1;
 
 function getSortStates(list){
 	const sorter = new PairwiseSorter(list.items.length);
@@ -162,25 +115,6 @@ async function compareItems(request, response) {
 	response.redirect('/list/' + request.params.list + '/comparisons');
 }
 
-function listToSorter(list) {
-	const sorter = new PairwiseSorter(list.items.length);
-
-	for (let question = sorter.getQuestion(); question; question = sorter.getQuestion()) {
-		const [ai, bi] = question;
-		const a = list.items[ai]._id.toString();
-		const b = list.items[bi]._id.toString();
-		if (list.comparisons.has(a) && list.comparisons.get(a).has(b)) {
-			sorter.addAnswer(list.comparisons.get(a).get(b).result);
-		} else if (list.comparisons.has(b) && list.comparisons.get(b).has(a)) {
-			sorter.addAnswer(list.comparisons.get(b).get(a).result);
-		} else {
-			break;
-		}
-	}
-
-	return sorter;
-}
-
 async function getNextComparison(request, response) {
 	const list = await List.findOne({
 		_id: request.params.list,
@@ -199,64 +133,6 @@ async function getNextComparison(request, response) {
 			b: list.items[question[1]],
 		}
 	});
-}
-
-async function logout(request, response, next) {
-	if (request.user.hasOnlyOAuth) await request.user.remove();
-	request.logout((err) => err ? next(err) : response.redirect('/'));
-}
-
-async function signup(request, response, next) {
-	const existing = await User.findOne({
-		username: new RegExp('^' + request.body.username + '$', 'i'),
-	});
-
-	if (existing) {
-		return response.render('signup', {
-			url: request.url,
-			user: request.user,
-			message: 'Username already exists'
-		});
-	}
-
-	let user;
-	if (request.user.hasOnlyOAuth){
-		request.user.username = request.body.username;
-		user = await request.user.save();
-	} else {
-		user = await new User({ username: request.body.username, password: await bcrypt.hash(request.body.password, 10) }).save();
-	}
-
-	await List.updateMany({
-		owner: request.user._id
-	}, {
-		$set: {
-			owner: user._id
-		}
-	});
-
-	const lastModifiedID = getLastModifiedList(await List.find({
-		owner: user._id
-	}));
-
-	request.login(user, err => {
-		if (err) return next(err);
-
-		if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
-		return response.redirect('/');
-	});
-}
-
-async function login(request, response) {
-	await List.updateMany({ owner: request.oldSessionId }, {
-		owner: request.user._id
-	});
-
-	const lastModifiedID = getLastModifiedList(await List.find({
-		owner: request.user._id
-	}));
-	if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
-	return response.redirect('/');
 }
 
 async function deleteList(request, response) {
@@ -399,4 +275,4 @@ async function patchItem(request, response, next) {
 	response.redirect('/list/' + request.params.list + '#unsorted-tab');
 }
 
-module.exports = { login, logout, signup, createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, compareItems, getNextComparison, getList, homepage, lists, renderItemRenamePage, patchItem, patchList };
+module.exports = { createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, compareItems, getNextComparison, getList, renderItemRenamePage, patchItem, patchList };
