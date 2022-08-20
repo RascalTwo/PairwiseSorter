@@ -3,4 +3,11 @@ function redirectPartialOAuthUsers(request, response, next) {
 	next();
 }
 
-module.exports = { redirectPartialOAuthUsers };
+function addOauthAvailableToViewLocals(oauthAvailable) {
+	return (_, response, next) => {
+		response.locals.oauthAvailable = oauthAvailable;
+		next();
+	}
+}
+
+module.exports = { redirectPartialOAuthUsers, addOauthAvailableToViewLocals };

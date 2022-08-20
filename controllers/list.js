@@ -2,7 +2,7 @@ const List = require('../models/List');
 const PairwiseSorter = require('../sorter.js');
 const { listToSorter, calculateProgress } = require('../helpers.js');
 
-async function createList(request, response, next) {
+async function create(request, response, next) {
 	if (request.body.name === '') return lists(request, response, next, { message: 'List name cannot be empty' });
 
 	const newList = await new List({
@@ -15,7 +15,7 @@ async function createList(request, response, next) {
 
 async function createItems(request, response, next) {
 	const names = request.body.names?.split('\n').map(line => line.trim()).filter(Boolean) || [];
-	if (!names.length) return getList(request, response, next, { message: 'At least one item name required' });
+	if (!names.length) return render(request, response, next, { message: 'At least one item name required' });
 
 	await List.updateOne({
 		_id: request.params.list,
@@ -67,7 +67,7 @@ function getSortStates(list){
 	return states;
 }
 
-async function getList(request, response) {
+async function render(request, response) {
 	const list = await List.findOne({ _id: request.params.list });
 	if (!list) return response.status(404).end();
 
@@ -115,7 +115,7 @@ async function compareItems(request, response) {
 	response.redirect('/list/' + request.params.list + '/comparisons');
 }
 
-async function getNextComparison(request, response) {
+async function renderNextComparison(request, response) {
 	const list = await List.findOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -135,7 +135,7 @@ async function getNextComparison(request, response) {
 	});
 }
 
-async function deleteList(request, response) {
+async function del(request, response) {
 	await List.deleteOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -144,7 +144,7 @@ async function deleteList(request, response) {
 	response.redirect('/');
 }
 
-async function deleteItem(request, response) {
+async function delItem(request, response) {
 	const filter = {
 		_id: request.params.list,
 		owner: request.user._id,
@@ -187,7 +187,7 @@ async function resetItem(request, response) {
 	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-async function resetComparison(request, response) {
+async function resetItemComparison(request, response) {
 	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -200,7 +200,7 @@ async function resetComparison(request, response) {
 	response.redirect('/list/' + request.params.list + '#comparisons-tab');
 }
 
-async function resetListComparisons(request, response) {
+async function resetComparisons(request, response) {
 	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -213,8 +213,8 @@ async function resetListComparisons(request, response) {
 	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-async function patchList(request, response, next) {
-	if (request.body.name === '') return getList(request, response, next, { message: 'New list name cannot be empty' });
+async function update(request, response, next) {
+	if (request.body.name === '') return render(request, response, next, { message: 'New list name cannot be empty' });
 
 	const updateFilter = {
 		$set: {}
@@ -227,7 +227,7 @@ async function patchList(request, response, next) {
 			updateFilter.$unset = { public: 1 };
 			delete request.body.public;
 		} else {
-			return getList(request, response, next, { message: 'Invalid public value' });
+			return render(request, response, next, { message: 'Invalid public value' });
 		}
 	}
 
@@ -241,7 +241,7 @@ async function patchList(request, response, next) {
 	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-async function renderItemRenamePage(request, response) {
+async function renderItemRename(request, response) {
 	const list = await List.findOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -260,8 +260,8 @@ async function renderItemRenamePage(request, response) {
 	});
 }
 
-async function patchItem(request, response, next) {
-	if (request.body.name === '') return renderItemRenamePage(request, response, next, { message: 'New item name cannot be empty' });
+async function updateItem(request, response, next) {
+	if (request.body.name === '') return renderItemRename(request, response, next, { message: 'New item name cannot be empty' });
 	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -275,4 +275,4 @@ async function patchItem(request, response, next) {
 	response.redirect('/list/' + request.params.list + '#unsorted-tab');
 }
 
-module.exports = { createList, createItems, deleteList, deleteItem, resetItem, resetComparison, resetListComparisons, compareItems, getNextComparison, getList, renderItemRenamePage, patchItem, patchList };
+module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update };

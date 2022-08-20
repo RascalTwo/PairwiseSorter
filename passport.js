@@ -88,7 +88,7 @@ if (TWITCH_CLIENT_ID) passport.use(new TwitchStrategy({
 	scope: 'user_read'
 }, createOAuthVerification('twitch')));
 
-if (DROPBOX_CLIENT_ID) passport.use(new DropboxStrategy({
+if (DROPBOX_CLIENT_ID) passport.use('dropbox', new DropboxStrategy({
 	apiVersion: '2',
 	clientID: DROPBOX_CLIENT_ID,
 	clientSecret: DROPBOX_CLIENT_SECRET,

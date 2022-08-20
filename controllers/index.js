@@ -2,7 +2,7 @@ const List = require('../models/List');
 const { listToSorter, calculateProgress } = require('../helpers.js');
 
 
-async function homepage(request, response) {
+async function renderHomepage(request, response) {
 	const lists = await List.find({ public: true });
 	return response.render('index', {
 		url: request.url,
@@ -19,7 +19,7 @@ async function homepage(request, response) {
 	});
 }
 
-async function lists(request, response) {
+async function renderLists(request, response) {
 	const lists = await List.find({ owner: request.user._id });
 	response.render('lists', {
 		url: request.url,
@@ -30,4 +30,4 @@ async function lists(request, response) {
 }
 
 
-module.exports = { homepage, lists };
+module.exports = { renderHomepage, renderLists };

@@ -2,110 +2,44 @@ const PromiseRouter = require('express-promise-router');
 const passport = require('passport');
 const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID, TWITTER_CONSUMER_KEY, TWITCH_CLIENT_ID, DROPBOX_CLIENT_ID } = require('../config/constants');
 
-const { logout, login, signup } = require('../controllers/user.js');
-const { redirectPartialOAuthUsers } = require('../middlewares/index.js');
+const userController = require('../controllers/user.js');
+const { redirectPartialOAuthUsers, addOauthAvailableToViewLocals } = require('../middlewares/index.js');
 const router = PromiseRouter();
 
 
-router.get('/logout', logout);
+router.get('/logout', userController.logout);
+router.get('/logout/:provider', userController.logoutOfProvider);
 
 router.use(redirectPartialOAuthUsers);
 
-const hasGoogle = !!GOOGLE_CLIENT_ID;
 
-if (hasGoogle) {
-	router.get('/login/google', passport.authenticate('google'));
-	router.get('/oauth2/redirect/google',
-		passport.authenticate('google', { failureRedirect: '/login', failureMessage: true }),
-		(_, response) => response.redirect('/')
+router.use(addOauthAvailableToViewLocals(Object.entries({
+	dropbox: DROPBOX_CLIENT_ID,
+	twitter: TWITTER_CONSUMER_KEY,
+	discord: DISCORD_CLIENT_ID,
+	github: GITHUB_CLIENT_ID,
+	twitch: TWITCH_CLIENT_ID,
+	google: GOOGLE_CLIENT_ID,
+}).reduce((oauthAvailable, [provider, clientId]) => {
+	if (!clientId) return { [provider]: false, ...oauthAvailable };
+
+	router.get('/login/' + provider, passport.authenticate(provider));
+	router.get('/oauth2/redirect/' + provider,
+		passport.authenticate(provider, { successRedirect: '/', failureRedirect: '/login', failureMessage: true })
 	);
-}
 
-const hasDiscord = !!DISCORD_CLIENT_ID;
-if (hasDiscord) {
-	router.get('/login/discord', passport.authenticate('discord'));
-	router.get('/oauth2/redirect/discord',
-		passport.authenticate('discord', { failureRedirect: '/login', failureMessage: true }),
-		(_, response) => response.redirect('/')
-	);
-}
-
-const hasGithub = !!GITHUB_CLIENT_ID;
-if (hasGithub) {
-	router.get('/login/github', passport.authenticate('github'));
-	router.get('/oauth2/redirect/github',
-		passport.authenticate('github', { failureRedirect: '/login', failureMessage: true }),
-		(_, response) => response.redirect('/')
-	);
-}
-
-const hasTwitter = !!TWITTER_CONSUMER_KEY;
-if (hasTwitter) {
-	router.get('/login/twitter', passport.authenticate('twitter'));
-	router.get('/oauth2/redirect/twitter',
-		passport.authenticate('twitter', { failureRedirect: '/login', failureMessage: true }),
-		(_, response) => response.redirect('/')
-	);
-}
-
-const hasTwitch = !!TWITCH_CLIENT_ID;
-if (hasTwitch) {
-	router.get('/login/twitch', passport.authenticate('twitch'));
-	router.get('/oauth2/redirect/twitch',
-		passport.authenticate('twitch', { failureRedirect: '/login', failureMessage: true }),
-		(_, response) => response.redirect('/')
-	);
-}
-
-const hasDropbox = !!DROPBOX_CLIENT_ID;
-if (hasDropbox) {
-	router.get('/login/dropbox', passport.authenticate('dropbox-oauth2'));
-	router.get('/oauth2/redirect/dropbox',
-		passport.authenticate('dropbox-oauth2', { failureRedirect: '/login', failureMessage: true }),
-		(_, response) => response.redirect('/')
-	);
-}
-
-const oauthAvailable = {
-	google: hasGoogle,
-	discord: hasDiscord,
-	github: hasGithub,
-	twitter: hasTwitter,
-	twitch: hasTwitch,
-	dropbox: hasDropbox
-};
+	return { [provider]: true, ...oauthAvailable };
+}, {})));
 
 router.route('/login')
-	.get((request, response) => response.render('login', {
-		url: request.url,
-		user: request.user,
-		oauthAvailable
-	}))
-	.post(passport.authenticate('local', { failureRedirect: '/login' }), login);
+	.get(userController.renderLogin)
+	.post(passport.authenticate('local', { failureRedirect: '/login' }), userController.login);
 
 router.route('/signup')
-	.get((request, response) => response.render('signup', {
-		url: request.url,
-		user: request.user,
-		oauthAvailable
-	}))
-	.post(signup);
+	.get(userController.renderSignup)
+	.post(userController.signup);
 
-router.get('/profile', (request, response) => response.render('profile', {
-	url: request.url,
-	user: request.user,
-	oauthAvailable
-}));
-
-router.get('/logout/:provider', async (request, response) => {
-	const { provider } = request.params;
-	if (provider in oauthAvailable) {
-		request.user.connected[provider + 'Id'] = undefined;
-		await request.user.save();
-		return response.redirect('/');
-	}
-	return response.status(404).send();
-});
+router.get('/profile', userController.renderProfile);
 
 
 module.exports = router;

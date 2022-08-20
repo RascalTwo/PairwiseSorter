@@ -24,6 +24,13 @@ async function logout(request, response, next) {
 	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
 
+function renderLogin(request, response){
+	return response.render('login', {
+		url: request.url,
+		user: request.user
+	})
+}
+
 async function login(request, response) {
 	await List.updateMany({ owner: request.oldSessionId }, {
 		owner: request.user._id
@@ -34,6 +41,13 @@ async function login(request, response) {
 	}));
 	if (lastModifiedID) return response.redirect(`/list/${lastModifiedID}#sorted-tab`);
 	return response.redirect('/');
+}
+
+function renderSignup(request, response){
+	return response.render('signup', {
+		url: request.url,
+		user: request.user
+	})
 }
 
 async function signup(request, response, next) {
@@ -77,4 +91,21 @@ async function signup(request, response, next) {
 	});
 }
 
-module.exports = { logout, login, signup };
+function renderProfile(request, response){
+	return response.render('profile', {
+		url: request.url,
+		user: request.user
+	})
+}
+
+async function logoutOfProvider(request, response) {
+	const { provider } = request.params;
+	if (provider in oauthAvailable) {
+		request.user.connected[provider + 'Id'] = undefined;
+		await request.user.save();
+		return response.redirect('/');
+	}
+	return response.status(404).send();
+}
+
+module.exports = { logout, renderLogin, login, renderSignup, signup, renderProfile, logoutOfProvider };
