@@ -4,7 +4,7 @@ if (alertAnchor) alertAnchor.addEventListener('click', (e) => {
 	alertAnchor.remove();
 });
 
-const executions = (() => {
+const runUserJavaScript = (() => {
 	const SPINNER = '<div class="spinner-border" role="status"></div>';
 	const consentedCode = JSON.parse(localStorage.getItem('r2-consented-code') || '{}');
 
@@ -57,35 +57,40 @@ const executions = (() => {
 		return startExecutions().catch(console.error).finally(() => executing = false);
 	}
 
-	for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name')) {
-		itemNameEl.childNodes[0].remove();
+	function start() {
+		for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name:not([data-processed])')) {
+			itemNameEl.dataset.processed = true;
+			itemNameEl.childNodes[0].remove();
 
-		const key = getKey(itemNameEl);
+			const key = getKey(itemNameEl);
 
-		if (consentedCode[key.base64] === true) {
-			const keyStr = JSON.stringify(key);
-			executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
-			itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
-			continue;
+			if (consentedCode[key.base64] === true) {
+				const keyStr = JSON.stringify(key);
+				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
+				itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
+				continue;
+			}
+
+			const itemName = JSON.parse(itemNameEl.dataset.itemName);
+
+			const button = document.createElement('button');
+			button.className = 'btn btn-primary';
+			button.innerText = 'Consent to JavaScript';
+			button.dataset.bsToggle = 'tooltip';
+			button.dataset.bsTitle = itemName;
+			button.title = itemName;
+			button.type = 'button';
+			button.addEventListener('click', handleConsentButton);
+
+			itemNameEl.appendChild(button);
 		}
 
-		const itemName = JSON.parse(itemNameEl.dataset.itemName);
-
-		const button = document.createElement('button');
-		button.className = 'btn btn-primary';
-		button.innerText = 'Consent to JavaScript';
-		button.dataset.bsToggle = 'tooltip';
-		button.dataset.bsTitle = itemName;
-		button.title = itemName;
-		button.type = 'button';
-		button.addEventListener('click', handleConsentButton);
-
-		itemNameEl.appendChild(button);
+		return startExecutions().catch(console.error).finally(() => executing = false);
 	}
 
-	startExecutions().catch(console.error).finally(() => executing = false);
-
-	return executions;
+	return start;
 })();
+
+runUserJavaScript();
 
 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));

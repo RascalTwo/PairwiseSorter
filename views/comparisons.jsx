@@ -11,13 +11,17 @@ export default function Comparisons({ list, listProgress, comparison, ...mainPro
 		<div id="comparisons-container" className="container text-center" data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
 			<div className="row align-items-center">
 				<div className="col">
-					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=-1&_method=POST`}><ItemContent name={comparison.a.name} /></a>
+					<ItemContent name={comparison.a.name} />
+					<br />
+					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=-1&_method=POST`}>Left</a>
 				</div>
 				<div className="col">
 					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=0&_method=POST`}>Neither</a>
 				</div>
 				<div className="col">
-					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=1&_method=POST`}><ItemContent name={comparison.b.name} /></a>
+					<ItemContent name={comparison.b.name} />
+					<br />
+					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=1&_method=POST`}>Right</a>
 				</div>
 			</div>
 		</div>
