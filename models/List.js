@@ -18,6 +18,9 @@ const listSchema = new Schema({
 			message: props => `${props.value} can only be true`
 		},
 	},
+	htmlGeneratingCode: {
+		type: String,
+	},
 	items: [new Schema({ name: { type: String, minLength: 1, required: true } }, { timestamps: true })],
 	comparisons: {
 		type: Map,

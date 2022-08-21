@@ -38,8 +38,25 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 		{isOwner
 			? <>
 				<details>
-					<summary>Rename</summary>
+					<summary>Update</summary>
+
 					<RenameForm list={list} title="List" defaultValue={list.name} />
+
+					<form method="POST">
+						<input type="hidden" name="_method" value="PATCH" />
+						<label htmlFor="htmlGeneratingCode" className="form-label">HTML-Generating JavaScript</label>
+						<textarea className="form-control" id="htmlGeneratingCode" name="htmlGeneratingCode" placeholder="Code that generates HTML representing item" defaultValue={list.htmlGeneratingCode || `
+/**
+ * Return the HTML content representing the current item, sandboxed in an <iframe>.
+ *
+ * @param {string} name Name of item
+ * @returns {string} HTML of item
+ */
+async function generateHTML(name){
+	return \`<span style="color: red;">\${name}</span>\`;
+}`.trim()} rows={10}></textarea>
+						<button className="btn btn-primary">Update</button>
+					</form>
 				</details>
 
 				<form action={`/list/${list._id}`} method="POST">
@@ -48,7 +65,13 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 					<button className="btn btn-primary">Add Item(s)</button>
 				</form>
 			</>
-			: null
+			: list.htmlGeneratingCode
+				? <details>
+					<summary>View JavaScript Code</summary>
+
+					<textarea className="form-control" defaultValue={list.htmlGeneratingCode} rows={10} readOnly></textarea>
+				</details>
+				: null
 		}
 
 		<ul className="nav justify-content-center nav-tabs">
@@ -63,9 +86,11 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 			</li>
 		</ul>
 
-		<SortedList list={list} order={order} />
-		<UnsortedList list={list} isOwner={isOwner} />
-		<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} />
+		<span data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
+			<SortedList list={list} order={order} />
+			<UnsortedList list={list} isOwner={isOwner} />
+			<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} />
+		</span>
 
 		<div id="sorting-container">
 			<Card
@@ -76,7 +101,7 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 					data-list={JSON.stringify(list)}
 					data-denormalized-comparisons={JSON.stringify([...denormalizedComparisons].reverse())}
 				></ul>}
-				footer={<button className="btn btn-primary">Play Animation</button>}
+				footer={<button className="btn btn-primary" type="button">Play Animation</button>}
 			/>
 		</div>
 

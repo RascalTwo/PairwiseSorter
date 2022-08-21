@@ -6,6 +6,9 @@ export default ({ list, title, defaultValue, returnTab }) => <form method="POST"
 	<input type="text" className="form-control" id="name" name="name" required defaultValue={defaultValue} />
 	<div className="btn-group float-end" role="group" aria-label="List Actions">
 		<button className="btn btn-primary">Rename</button>
-		<a href={`/list/${list._id}${returnTab ? '#' + returnTab : ''}`} className="btn btn-danger">Cancel</a>
+		{returnTab
+			? <a href={`/list/${list._id}#${returnTab}`} className="btn btn-danger">Cancel</a>
+			: null
+		}
 	</div>
 </form>;

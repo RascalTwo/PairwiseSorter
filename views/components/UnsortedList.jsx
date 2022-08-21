@@ -1,9 +1,10 @@
 import React from 'react';
+import ItemContent from './ItemContent';
 
 export default ({ list, isOwner }) => <ul className="list-group" id="unsorted-tab">
 	{list.items.map(item =>
 		<li key={item._id} className="list-group-item d-flex justify-content-between align-items-center">
-			{item.name}
+			<ItemContent name={item.name} />
 			{isOwner
 				? <div className="btn-group" role="group" aria-label="Item Actions">
 					<a className="btn btn-primary" href={`/list/${list._id}/${item._id}`}>Rename</a>

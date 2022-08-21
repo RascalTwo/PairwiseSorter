@@ -1,6 +1,6 @@
 {
   "name": "pairwisesorter",
-  "version": "1.21.5",
+  "version": "1.22.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "npm run unit-test && npm run e2e-test",
     "lint": "eslint .",
     "start": "cross-env NODE_ENV=production node index.js",
-    "dev": "cross-env NODE_ENV=development concurrently \"nodemon --ignore dev-sessions index.js\" \"wait-on tcp:1337 && browser-sync start --proxy localhost:1337 --files 'views,public'\"",
+    "dev": "cross-env NODE_ENV=development concurrently \"nodemon --ignore dev-sessions --ignore public --ignore views index.js\" \"wait-on tcp:1337 && browser-sync start --proxy localhost:1337 --files 'views,public'\"",
     "preinstall": "node scripts/create-env.js",
     "prepare": "husky install"
   },

@@ -231,6 +231,11 @@ async function update(request, response, next) {
 		}
 	}
 
+	if (request.body.htmlGeneratingCode === '') {
+		updateFilter.$unset = { htmlGeneratingCode: 1 };
+		delete request.body.htmlGeneratingCode;
+	}
+
 	Object.assign(updateFilter.$set, request.body);
 
 	await List.updateOne({

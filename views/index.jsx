@@ -2,6 +2,7 @@ import React from 'react';
 import Main from './Main';
 import Card from './components/Card';
 import TimeAgo from './components/TimeAgo';
+import ItemContent from './components/ItemContent';
 
 
 export default function Index({ lists, ...mainProps}) {
@@ -23,9 +24,9 @@ export default function Index({ lists, ...mainProps}) {
 						}
 					</>}
 					body={<p className="card-text">
-						<ul className="list-group">
+						<ul className="list-group" data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
 							{list.order.slice(0, 3).map(i => list.items[i]).filter(Boolean).map(({ _id, name }) =>
-								<li key={_id} className="list-group-item text-truncate" data-bs-toggle="tooltip" data-bs-title={name} title={name}>{name}</li>
+								<li key={_id} className="list-group-item text-truncate" data-bs-toggle="tooltip" data-bs-title={name} title={name}><ItemContent name={name} /></li>
 							)}
 						</ul>
 					</p>}
