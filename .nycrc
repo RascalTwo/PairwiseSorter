@@ -1,0 +1,13 @@
+{
+  "all": true,
+  "exclude": [
+    "node_modlues",
+    "coverage",
+    "public/jailed",
+    "cypress",
+    "scripts",
+    "tests",
+    "cypress.config.ts",
+    "index.js"
+  ]
+}

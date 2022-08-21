@@ -1,6 +1,7 @@
 node_modules
 database
 coverage
+.nyc_output
 dev-sessions
 config/.env*
 !config/.env.example

@@ -11,6 +11,10 @@ const { SESSION_SECRET, MONGODB_URL, NODE_ENV } = require('./config/constants');
 
 const app = express();
 
+try{
+	if (NODE_ENV === 'testing') require('@cypress/code-coverage/middleware/express')(app);
+} catch (_) {}
+
 app.engine('jsx', createEngine());
 app.set('view engine', 'jsx');
 app.use(express.json());
