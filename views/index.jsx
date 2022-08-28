@@ -32,7 +32,7 @@ export default function Index({ lists, ...mainProps}) {
 					</p>}
 
 					footer={<>
-						<span></span>
+						<a href={`/user/${list.owner.username}`}>{list.owner.username}</a>
 						<TimeAgo date={list.updatedAt} />
 					</>}
 				/>)}

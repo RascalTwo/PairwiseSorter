@@ -3,7 +3,7 @@ const { listToSorter, calculateProgress } = require('../helpers.js');
 
 
 async function renderHomepage(request, response) {
-	const lists = await List.find({ public: true });
+	const lists = await List.find({ public: true }).populate('owner');
 	return response.render('index', {
 		url: request.url,
 		user: request.user,

@@ -35,6 +35,12 @@ const userSchema = new Schema({
 	}
 }, { timestamps: { createdAt: true } });
 
+userSchema.virtual('lists', {
+  ref: 'List',
+  localField: '_id',
+  foreignField: 'owner'
+});
+
 for (const method of ['updateOne', 'updateMany', 'findOneAndUpdate']) userSchema.pre(method, function (next) {
 	this.options.runValidators = true;
 	next();

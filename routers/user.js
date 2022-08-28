@@ -39,7 +39,7 @@ router.route('/signup')
 	.get(userController.renderSignup)
 	.post(userController.signup);
 
-router.get('/profile', userController.renderProfile);
+router.get('/user/:username', userController.renderProfile)
 
 
 module.exports = router;
