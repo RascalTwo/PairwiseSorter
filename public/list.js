@@ -33,7 +33,7 @@ links.forEach(link => link.addEventListener('click', event => {
 
 	const sorting = document.querySelector('#sorting-list');
 	const list = JSON.parse(sorting.dataset.list);
-	const sortStates = JSON.parse(sorting.dataset.sortStates);
+	const states = JSON.parse(sorting.dataset.states);
 
 	let playing = false;
 	async function playAnimation() {
@@ -45,7 +45,7 @@ links.forEach(link => link.addEventListener('click', event => {
 		this.textContent = 'Replay Animaion';
 	
 		sorting.innerHTML = '';
-		for (const state of sortStates) {
+		for (const state of states) {
 			for (let i = 0; i <= state.order.length; i++) {
 				const index = i < state.order.length ? state.order[i] : -1;
 				let li;

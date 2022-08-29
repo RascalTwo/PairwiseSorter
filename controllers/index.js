@@ -1,5 +1,4 @@
 const List = require('../models/List');
-const { listToSorter, calculateProgress } = require('../helpers.js');
 
 
 async function renderHomepage(request, response) {
@@ -7,15 +6,10 @@ async function renderHomepage(request, response) {
 	return response.render('index', {
 		url: request.url,
 		user: request.user,
-		lists: lists.map(list => {
-			const sorter = listToSorter(list);
-
-			return {
-				...list.toObject(),
-				progress: calculateProgress(sorter),
-				order: sorter.getOrder(),
-			};
-		})
+		lists: lists.map(list => ({
+			...list.toObject(),
+			...list.getSortInfo({ progress: true, order: true })
+		}))
 	});
 }
 

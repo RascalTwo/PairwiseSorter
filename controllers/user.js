@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const List = require('../models/List');
 const User = require('../models/User');
-const { listToSorter, calculateProgress } = require('../helpers.js');
 
 
 function getLastModifiedList(lists) {
@@ -25,7 +24,7 @@ async function logout(request, response, next) {
 	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
 
-function renderLogin(request, response) {
+function renderLogin(request, response){
 	return response.render('login', {
 		url: request.url,
 		user: request.user
@@ -44,7 +43,7 @@ async function login(request, response) {
 	return response.redirect('/');
 }
 
-function renderSignup(request, response) {
+function renderSignup(request, response){
 	return response.render('signup', {
 		url: request.url,
 		user: request.user
@@ -65,7 +64,7 @@ async function signup(request, response, next) {
 	}
 
 	let user;
-	if (request.user.hasOnlyOAuth) {
+	if (request.user.hasOnlyOAuth){
 		request.user.username = request.body.username;
 		user = await request.user.save();
 	} else {
@@ -108,15 +107,10 @@ async function renderProfile(request, response) {
 		user: request.user,
 		visitingUser: {
 			...visitingUser.toObject(),
-			lists: visitingUser.lists.map(list => {
-				const sorter = listToSorter(list);
-
-				return {
-					...list.toObject(),
-					progress: calculateProgress(sorter),
-					order: sorter.getOrder(),
-				};
-			})
+			lists: visitingUser.lists.map(list => ({
+				...list.toObject(),
+				...list.getSortInfo({ progress: true, order: true })
+			}))
 		}
 	});
 }

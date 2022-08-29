@@ -1,6 +1,4 @@
 const List = require('../models/List');
-const PairwiseSorter = require('../sorter.js');
-const { listToSorter, calculateProgress } = require('../helpers.js');
 
 async function create(request, response, next) {
 	if (request.body.name === '') return lists(request, response, next, { message: 'List name cannot be empty' });
@@ -33,39 +31,6 @@ async function createItems(request, response, next) {
 	response.redirect('/list/' + request.params.list + '#sorted-tab');
 }
 
-function getSortStates(list){
-	const sorter = new PairwiseSorter(list.items.length);
-
-	const states = [];
-
-	for (let question = sorter.getQuestion(); question; question = sorter.getQuestion()) {
-		states.push({ order: sorter.getOrder(), current: { ...sorter.current }});
-		const [ai, bi] = question;
-		const a = list.items[ai]._id.toString();
-		const b = list.items[bi]._id.toString();
-		const current = { ...sorter.current };
-		if (list.comparisons.has(a) && list.comparisons.get(a).has(b)) {
-			const result = list.comparisons.get(a).get(b).result;
-			if (result === -1) current.max = current.try;
-			else current.min = current.try + 1;
-
-			sorter.addAnswer(result);
-		} else if (list.comparisons.has(b) && list.comparisons.get(b).has(a)) {
-			const result = list.comparisons.get(b).get(a).result;
-			if (result === -1) current.max = current.try;
-			else current.min = current.try + 1;
-
-			sorter.addAnswer(result);
-		} else {
-			break;
-		}
-		states.push({ order: sorter.getOrder(), current});
-	}
-
-	states.push({ order: sorter.getOrder() });
-
-	return states;
-}
 
 async function render(request, response) {
 	const list = await List.findOne({ _id: request.params.list });
@@ -73,8 +38,6 @@ async function render(request, response) {
 
 	const isOwner = list.owner.equals(request.user._id);
 	if (!isOwner && !list.public) return response.status(403).end();
-
-	const sorter = listToSorter(list);
 
 	const denormalizedComparisons = [];
 	for (const a of list.comparisons.keys()) {
@@ -92,9 +55,7 @@ async function render(request, response) {
 		isOwner,
 		list,
 		denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
-		listProgress: calculateProgress(sorter),
-		order: sorter.getOrder(),
-		sortStates: getSortStates(list),
+		...list.getSortInfo({ progress: true, order: true, states: true }),
 		...arguments[3] || {}
 	});
 }
@@ -120,14 +81,13 @@ async function renderNextComparison(request, response) {
 		_id: request.params.list,
 		owner: request.user._id,
 	});
-	const sorter = listToSorter(list);
-	const question = sorter.getQuestion();
+	const question = list.getSorter().sorter.getQuestion();
 	if (!question) return response.redirect('/list/' + request.params.list + '#sorted-tab');
 	return response.render('comparisons', {
 		url: request.url,
 		user: request.user,
 		list,
-		listProgress: calculateProgress(sorter),
+		...list.getSortInfo({ progress: true }),
 		comparison: {
 			a: list.items[question[0]],
 			b: list.items[question[1]],

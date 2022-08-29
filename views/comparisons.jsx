@@ -3,9 +3,9 @@ import Main from './Main';
 import Title from './components/Title';
 import ItemContent from './components/ItemContent';
 
-export default function Comparisons({ list, listProgress, comparison, ...mainProps}) {
+export default function Comparisons({ list, progress, comparison, ...mainProps}) {
 	return <Main {...mainProps}>
-		<Title list={list} listProgress={listProgress} />
+		<Title list={list} progress={progress} />
 		<p className="text-center">Choose which item should be sorted higher</p>
 		<p className="text-center">You can additionally keyboard controls <kbd title="Left Arrow or A">&lt;-</kbd>, <kbd title="Up Arrow or W">^</kbd>, and <kbd title="Right Arrow or D">-&gt;</kbd> to choose the options</p>
 		<div id="comparisons-container" className="container text-center" data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>

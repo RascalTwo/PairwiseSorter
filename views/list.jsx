@@ -8,11 +8,11 @@ import ComparisonsList from './components/ComparisonsList';
 import TimeAgo from './components/TimeAgo';
 import Card from './components/Card';
 
-export default function Index({ list, order, isOwner, listProgress, denormalizedComparisons, sortStates, ...mainProps }) {
+export default function Index({ list, order, isOwner, progress, denormalizedComparisons, states, ...mainProps }) {
 	return <Main {...mainProps}>
 		{isOwner
 			? <div className="btn-group float-end" role="group" aria-label="List Actions">
-				{listProgress < 1
+				{progress < 1
 					? <a className="btn btn-primary" href={`/list/${list._id}/comparisons`}>Sort</a>
 					: null
 				}
@@ -22,7 +22,7 @@ export default function Index({ list, order, isOwner, listProgress, denormalized
 			</div>
 			: null
 		}
-		<Title list={list} listProgress={listProgress} />
+		<Title list={list} progress={progress} />
 
 		<div className="float-end">
 			Created At: <time datetime={list.updatedAt.toISOString()}>{list.createdAt.toLocaleString()}</time>
@@ -97,7 +97,7 @@ async function generateHTML(name){
 				header="Sorting Animation"
 				body={<ul
 					id="sorting-list"
-					data-sort-states={JSON.stringify(sortStates)}
+					data-sort-states={JSON.stringify(states)}
 					data-list={JSON.stringify(list)}
 					data-denormalized-comparisons={JSON.stringify([...denormalizedComparisons].reverse())}
 				></ul>}

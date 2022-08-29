@@ -9,6 +9,10 @@ module.exports = class PairwiseSorter {
 		this.current = { item: 1, try: 0, min: 0, max: 1 };
 	}
 
+	getProgress() {
+		return this.size ? (this.current.item) / this.size : 1;
+	}
+
 	/**
 	 * @param {-1 | 0 | 1} preference
 	 */
