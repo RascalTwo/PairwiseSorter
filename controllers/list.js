@@ -50,8 +50,6 @@ async function render(request, response) {
 	}
 
 	return response.render('list', {
-		url: request.url,
-		user: request.user,
 		isOwner,
 		list,
 		denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
@@ -84,8 +82,6 @@ async function renderNextComparison(request, response) {
 	const question = list.getSorter().sorter.getQuestion();
 	if (!question) return response.redirect('/list/' + request.params.list + '#sorted-tab');
 	return response.render('comparisons', {
-		url: request.url,
-		user: request.user,
 		list,
 		...list.getSortInfo({ progress: true }),
 		comparison: {
@@ -217,9 +213,7 @@ async function renderItemRename(request, response) {
 	const item = list.items.find(item => item._id.equals(itemID));
 	if (!item) return response.redirect('/');
 	return response.render('rename-item', {
-		url: request.url,
-		user: request.user,
-		list: list,
+		list,
 		item,
 		...arguments[3] || {}
 	});

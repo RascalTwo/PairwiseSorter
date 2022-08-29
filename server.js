@@ -7,6 +7,7 @@ const { ObjectId } = require('mongodb');
 const MongoStore = require('connect-mongo');
 const expressSession = require('express-session');
 const setupPassport = require('./passport');
+const middlewares = require('./middlewares/index.js');
 const { SESSION_SECRET, MONGODB_URL, NODE_ENV } = require('./config/constants');
 
 const app = express();
@@ -48,12 +49,9 @@ app.use(expressSession({
 }));
 setupPassport(app);
 
-app.use((request, _, next) => {
-	if (!request.user) request.user = { _id: request.session.id };
-	request.oldSessionId = request.session.id;
-	request.user.hasOnlyOAuth = !request.user.username && request.user.createdAt;
-	next();
-});
+app.use(middlewares.createAnonymousUser);
+app.use(middlewares.trackOldSessionID);
+app.use(middlewares.exposeUserAndURLToView);
 
 app.use(require('./routers/index.js'));
 app.use(require('./routers/user.js'));

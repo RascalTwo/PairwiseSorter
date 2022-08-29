@@ -3,11 +3,20 @@ function redirectPartialOAuthUsers(request, response, next) {
 	next();
 }
 
-function addOauthAvailableToViewLocals(oauthAvailable) {
-	return (_, response, next) => {
-		response.locals.oauthAvailable = oauthAvailable;
-		next();
-	}
+function createAnonymousUser(request, _, next) {
+	if (!request.user) request.user = { _id: request.session.id, hasOnlyOAuth: false };
+	next();
 }
 
-module.exports = { redirectPartialOAuthUsers, addOauthAvailableToViewLocals };
+function trackOldSessionID(request, _, next) {
+	request.oldSessionId = request.session.id;
+	next();
+}
+
+function exposeUserAndURLToView(request, response, next) {
+	response.locals.url = request.url;
+	response.locals.user = request.user;
+	next();
+}
+
+module.exports = { redirectPartialOAuthUsers, createAnonymousUser, trackOldSessionID, exposeUserAndURLToView };

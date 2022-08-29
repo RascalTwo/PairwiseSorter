@@ -33,7 +33,16 @@ const userSchema = new Schema({
 		type: ConnectedProvidersSchema,
 		default: () => ({})
 	}
-}, { timestamps: { createdAt: true } });
+}, {
+	timestamps: { createdAt: true },
+	virtuals: {
+		hasOnlyOAuth: {
+			get() {
+				return !this.username
+			}
+		}
+	}
+});
 
 userSchema.virtual('lists', {
   ref: 'List',

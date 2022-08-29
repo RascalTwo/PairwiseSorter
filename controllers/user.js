@@ -24,12 +24,7 @@ async function logout(request, response, next) {
 	request.logout((err) => err ? next(err) : response.redirect('/'));
 }
 
-function renderLogin(request, response){
-	return response.render('login', {
-		url: request.url,
-		user: request.user
-	})
-}
+const renderLogin = (_, response) => response.render('login');
 
 async function login(request, response) {
 	await List.updateMany({ owner: request.oldSessionId }, {
@@ -43,25 +38,16 @@ async function login(request, response) {
 	return response.redirect('/');
 }
 
-function renderSignup(request, response){
-	return response.render('signup', {
-		url: request.url,
-		user: request.user
-	})
-}
+const renderSignup = (_, response) => response.render('signup');
 
 async function signup(request, response, next) {
 	const existing = await User.findOne({
 		username: new RegExp('^' + request.body.username + '$', 'i'),
 	});
 
-	if (existing) {
-		return response.render('signup', {
-			url: request.url,
-			user: request.user,
-			message: 'Username already exists'
-		});
-	}
+	if (existing) response.render('signup', {
+		message: 'Username already exists'
+	});
 
 	let user;
 	if (request.user.hasOnlyOAuth){
@@ -103,8 +89,6 @@ async function renderProfile(request, response) {
 	if (!visitingUser) return response.status(404).send();
 
 	return response.render('profile', {
-		url: request.url,
-		user: request.user,
 		visitingUser: {
 			...visitingUser.toObject(),
 			lists: visitingUser.lists.map(list => ({
