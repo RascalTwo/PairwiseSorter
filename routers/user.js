@@ -5,6 +5,7 @@ const { GOOGLE_CLIENT_ID, DISCORD_CLIENT_ID, GITHUB_CLIENT_ID, TWITTER_CONSUMER_
 const userController = require('../controllers/user.js');
 const { redirectPartialOAuthUsers } = require('../middlewares/index.js');
 const { addOauthAvailableToViewLocals } = require('../middlewares/user.js');
+const router = PromiseRouter();
 
 
 router.get('/logout', userController.logout);
