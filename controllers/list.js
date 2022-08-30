@@ -234,4 +234,36 @@ async function updateItem(request, response, next) {
 	response.redirect('/list/' + request.params.list + '#unsorted-tab');
 }
 
-module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update };
+async function bulkEditItems(request, response) {
+	const newNames = new Set(request.body.newNames.split('\n').map(s => s.trim()).filter(Boolean));
+
+	const list = await List.findOne({ _id: request.params.list, owner: request.user._id });
+
+	const deletedIDs = new Set();
+	for (let i = list.items.length - 1; i >= 0; i--) {
+		if (newNames.has(list.items[i].name)) newNames.delete(list.items[i].name);
+		else deletedIDs.add(list.items.splice(i, 1)[0].id);
+	}
+
+	for (const name of newNames) list.items.push({ name });
+
+	for (const [key, sub] of list.comparisons) {
+		if (deletedIDs.has(key)) {
+			list.comparisons.delete(key);
+			deletedIDs.delete(key);
+			continue;
+		}
+
+		for (const key of sub.keys()) {
+			if (deletedIDs.has(key)) {
+				sub.delete(key);
+				deletedIDs.delete(key);
+			}
+		}
+	}
+	await list.save();
+
+	return response.redirect('/list/' + request.params.list + '#sorted-tab')
+}
+
+module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems };

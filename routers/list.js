@@ -12,6 +12,7 @@ router.post('/list', listController.create);
 router.route('/list/:list')
 	.get(listController.render)
 	.post(listController.createItems)
+	.put(listController.bulkEditItems)
 	.patch(listController.update)
 	.delete(listController.del);
 

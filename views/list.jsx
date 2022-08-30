@@ -57,6 +57,13 @@ async function generateHTML(name){
 }`.trim()} rows={10}></textarea>
 						<button className="btn btn-primary">Update</button>
 					</form>
+
+					<form method="POST">
+						<input type="hidden" name="_method" value="PUT" />
+						<label htmlFor="newNames" className="form-label">Bulk Edit</label>
+						<textarea className="form-control" id="newNames" name="newNames" placeholder="Add and Delete items at once!" defaultValue={list.items.map(item => item.name).join('\n')} rows={10}></textarea>
+						<button className="btn btn-primary">Edit</button>
+					</form>
 				</details>
 
 				<form action={`/list/${list._id}`} method="POST">
