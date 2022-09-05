@@ -45,7 +45,7 @@ async function signup(request, response, next) {
 		username: new RegExp('^' + request.body.username + '$', 'i'),
 	});
 
-	if (existing) response.render('signup', {
+	if (existing) return response.render('signup', {
 		message: 'Username already exists'
 	});
 
