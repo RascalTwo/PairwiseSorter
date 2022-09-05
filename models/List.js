@@ -22,7 +22,12 @@ const listSchema = new Schema({
 	htmlGeneratingCode: {
 		type: String,
 	},
-	items: [new Schema({ name: { type: String, minLength: 1, required: true } }, { timestamps: true })],
+	items: [
+		new Schema({
+			name: { type: String, minLength: 1, required: true },
+			completedAt: { type: Date }
+		}, { timestamps: true })
+	],
 	comparisons: {
 		type: Map,
 		default: new Map(),

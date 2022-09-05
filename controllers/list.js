@@ -266,4 +266,24 @@ async function bulkEditItems(request, response) {
 	return response.redirect('/list/' + request.params.list + '#sorted-tab')
 }
 
-module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems };
+async function toggleItemCompleted(request, response){
+	const completed = request.body.value === 'true';
+
+	await List.updateOne({
+		_id: request.params.list,
+		owner: request.user._id,
+		items: { $elemMatch: { _id: request.params.item } }
+	}, completed ? {
+		$set: {
+			'items.$.completedAt': Date.now()
+		}
+	} : {
+		$unset: {
+			'items.$.completedAt': 1
+		}
+	});
+
+	return response.redirect('/list/' + request.params.list + '#sorted-tab')
+}
+
+module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems, toggleItemCompleted };

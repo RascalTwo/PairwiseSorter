@@ -10,6 +10,7 @@ export default ({ list, isOwner }) => <ul className="list-group" id="unsorted-ta
 					<a className="btn btn-primary" href={`/list/${list._id}/${item._id}`}>Rename</a>
 					<a className="btn btn-warning" href={`/list/${list._id}/${item._id}/comparisons?_method=PUT`}>Reset</a>
 					<a className="btn btn-danger" href={`/list/${list._id}/${item._id}?_method=DELETE`}>Delete</a>
+					<a className="btn btn-info" href={`/list/${list._id}/${item._id}/completed?_method=PATCH&value=${!item.completedAt}`}>Mark {item.completedAt ? 'Incomplete' : 'Complete'}</a>
 				</div>
 				: null
 			}

@@ -25,6 +25,8 @@ router.route('/list/:list/:item')
 	.patch(listController.updateItem)
 	.delete(listController.delItem);
 
+router.patch('/list/:list/:item/completed', listController.toggleItemCompleted)
+
 router.put('/list/:list/:item/comparisons', listController.resetItem);
 
 router.route('/list/:list/:a/:b')
