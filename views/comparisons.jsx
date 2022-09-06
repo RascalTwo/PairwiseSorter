@@ -11,7 +11,7 @@ export default function Comparisons({ list, progress, comparison, ...mainProps})
 		<div id="comparisons-container" className="container text-center" data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
 			<div className="row align-items-center">
 				<div className="col">
-					<ItemContent name={comparison.a.name} />
+					<ItemContent name={comparison.a.name} htmlGenerated={!!list.htmlGeneratingCode} />
 					<br />
 					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=-1&_method=POST`}>Left</a>
 				</div>
@@ -19,7 +19,7 @@ export default function Comparisons({ list, progress, comparison, ...mainProps})
 					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=0&_method=POST`}>Neither</a>
 				</div>
 				<div className="col">
-					<ItemContent name={comparison.b.name} />
+					<ItemContent name={comparison.b.name} htmlGenerated={!!list.htmlGeneratingCode} />
 					<br />
 					<a className="btn btn-primary" href={`/list/${list._id}/${comparison.a._id}/${comparison.b._id}?result=1&_method=POST`}>Right</a>
 				</div>

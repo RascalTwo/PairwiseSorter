@@ -7,6 +7,7 @@ if (alertAnchor) alertAnchor.addEventListener('click', (e) => {
 const runUserJavaScript = (() => {
 	const SPINNER = '<div class="spinner-border" role="status"></div>';
 	const consentedCode = JSON.parse(localStorage.getItem('r2-consented-code') || '{}');
+	const cachedExecutions = new Map(Object.entries(JSON.parse(localStorage.getItem('r2-code-executions') || '{}')));
 
 	const executions = new Map();
 
@@ -18,6 +19,9 @@ const runUserJavaScript = (() => {
 			const { base64, name } = JSON.parse(key);
 
 			const html = await new Promise((resolve, reject) => {
+				const cached = cachedExecutions.get(base64) || {};
+				if (name in cached) return resolve(cached[name]);
+
 				const plugin = new jailed.DynamicPlugin(`
 					${atob(base64)}
 
@@ -28,7 +32,13 @@ const runUserJavaScript = (() => {
 					});`,
 					{}
 				)
-				plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, resolve));
+				plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, html => {
+					cached[name] = html;
+					if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
+
+					localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
+					return resolve(html);
+				}));
 				plugin.whenFailed(reject);
 			});
 
@@ -60,12 +70,33 @@ const runUserJavaScript = (() => {
 	function start() {
 		for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name:not([data-processed])')) {
 			itemNameEl.dataset.processed = true;
-			itemNameEl.childNodes[0].remove();
 
 			const key = getKey(itemNameEl);
+			const keyStr = JSON.stringify(key);
+
+			const checkbox = itemNameEl.parentNode.querySelector('input');
+			checkbox.addEventListener('change', e => {
+				if (e.currentTarget.checked) {
+					itemNameEl.innerHTML = ''
+					executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
+					itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
+					return startExecutions().catch(console.error).finally(() => executing = false);
+				} else {
+					itemNameEl.innerHTML = key.name
+				}
+			})
+
+			itemNameEl.parentNode.querySelector('button').addEventListener('click', () => {
+				delete (cachedExecutions.get(key.base64) || {})[key.name];
+
+				itemNameEl.innerHTML = ''
+				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
+				itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
+				return startExecutions().catch(console.error).finally(() => executing = false);
+			});
 
 			if (consentedCode[key.base64] === true) {
-				const keyStr = JSON.stringify(key);
+				itemNameEl.innerHTML = ''
 				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
 				itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
 				continue;

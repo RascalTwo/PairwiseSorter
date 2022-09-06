@@ -95,3 +95,19 @@ kbd {
 				#sorting-list li[data-sorting="true"][data-selected="true"]::before {
 					color: yellow;
 				}
+
+.item-name-wrapper {
+	position: relative;
+	padding: 2rem 0;
+}
+
+.item-name-wrapper > div {
+	position: absolute;
+	top: 0;
+	right: 0;
+	text-align: end;
+}
+
+.item-name-wrapper > div > button {
+	padding: 0 .1rem;
+}

@@ -26,7 +26,7 @@ export default function Index({ lists, ...mainProps}) {
 					body={<p className="card-text">
 						<ul className="list-group" data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
 							{list.order.map(i => list.items[i]).filter(item => item && !item.completedAt).slice(0, 3).map(({ _id, name }) =>
-								<li key={_id} className="list-group-item text-truncate" data-bs-toggle="tooltip" data-bs-title={name} title={name}><ItemContent name={name} /></li>
+								<li key={_id} className="list-group-item text-truncate" data-bs-toggle="tooltip" data-bs-title={name} title={name}><ItemContent name={name} htmlGenerated={!!list.htmlGeneratingCode} /></li>
 							)}
 						</ul>
 					</p>}
