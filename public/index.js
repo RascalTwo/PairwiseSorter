@@ -70,6 +70,7 @@ const runUserJavaScript = (() => {
 	function start() {
 		for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name:not([data-processed])')) {
 			itemNameEl.dataset.processed = true;
+			itemNameEl.innerHTML = ''
 
 			const key = getKey(itemNameEl);
 			const keyStr = JSON.stringify(key);
@@ -96,7 +97,6 @@ const runUserJavaScript = (() => {
 			});
 
 			if (consentedCode[key.base64] === true) {
-				itemNameEl.innerHTML = ''
 				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
 				itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
 				continue;
