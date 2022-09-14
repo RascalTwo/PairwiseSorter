@@ -14,7 +14,7 @@ const app = express();
 
 try{
 	if (NODE_ENV === 'testing') require('@cypress/code-coverage/middleware/express')(app);
-} catch (_) {}
+} catch (e) { console.error(e) }
 
 app.engine('jsx', createEngine({ beautify: process.env.NODE_ENV !== 'production' }));
 app.set('view engine', 'jsx');
@@ -38,6 +38,7 @@ app.use(methodOverride((request) => {
 	}
 }, { methods: ['GET', 'POST'] }));
 app.use(morgan(NODE_ENV === 'production' ? 'combined' : 'dev'));
+if (NODE_ENV === 'testing') app.use(express.static('./public-instrumented'));
 app.use(express.static('./public'));
 app.use(cookieParser());
 app.use(expressSession({

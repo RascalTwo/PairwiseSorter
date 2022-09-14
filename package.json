@@ -1,11 +1,11 @@
 {
   "name": "pairwisesorter",
-  "version": "1.28.0",
+  "version": "1.28.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "unit-test": "cross-env NODE_ENV=testing jest",
-    "e2e-test": "cross-env NODE_ENV=testing start-server-and-test \"nyc --all node scripts/launch-test-server.js\" 1337 \"cypress run\"",
+    "e2e-test": "cross-env NODE_ENV=testing start-server-and-test \"nyc --all node scripts/launch-test-server.js\" 1337 \"npx nyc instrument --compact=false ./public ./public-instrumented && cypress run\"",
     "test": "npm run unit-test && npm run e2e-test",
     "lint": "eslint .",
     "start": "cross-env NODE_ENV=production node index.js",

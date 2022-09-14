@@ -8,6 +8,9 @@
     "scripts",
     "tests",
     "cypress.config.ts",
-    "index.js"
+    "./index.js",
+    "autoAnimate.js",
+    "public-instrumented",
+    "*.jsx"
   ]
 }

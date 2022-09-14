@@ -8,3 +8,4 @@ config/.env*
 cypress/videos
 cypress/downloads
 cypress/screenshots
+public-instrumented
