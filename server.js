@@ -16,6 +16,7 @@ try{
 	if (NODE_ENV === 'testing') require('@cypress/code-coverage/middleware/express')(app);
 } catch (e) { console.error(e) }
 
+app.set('trust proxy', true);
 app.engine('jsx', createEngine({ beautify: process.env.NODE_ENV !== 'production' }));
 app.set('view engine', 'jsx');
 app.use(express.json());
