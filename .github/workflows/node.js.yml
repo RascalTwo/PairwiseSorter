@@ -17,9 +17,9 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm test
-    - name: Deploy to Heroku
-      uses: AkhileshNS/heroku-deploy@v3.12.12
-      with:
-        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-        heroku_app_name: "r2-pairwise-sorter"
-        heroku_email: ${{secrets.HEROKU_EMAIL}}
+    - name: Install Railway
+      run: npm i -g @railway/cli
+    - name: Deploy to Railway
+      run: railway up
+      env:
+        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

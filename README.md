@@ -1,12 +1,12 @@
-# [Pairwise Sorter](https://r2-pairwise-sorter.herokuapp.com)
+# [Pairwise Sorter](https://pairwisesorter-production.up.railway.app/)
 
-[![Website](https://img.shields.io/website?url=https://r2-pairwise-sorter.herokuapp.com&label=Website)](https://r2-pairwise-sorter.herokuapp.com)
+[![Website](https://img.shields.io/website?url=https://pairwisesorter-production.up.railway.app/&label=Website)](https://pairwisesorter-production.up.railway.app/)
 
 Allows you to sort a list of items by efficiently comparing items in pairs!
 
-**Link to project:** https://r2-pairwise-sorter.herokuapp.com
+**Link to project:** https://pairwisesorter-production.up.railway.app/
 
-## How It's Made:
+## How It's Made
 
 **Tech used:** HTML, CSS, JavaScript, Express, Node.js, MongoDB, EJS, ESLint
 
