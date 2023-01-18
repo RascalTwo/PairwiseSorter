@@ -106,6 +106,9 @@ async function delItem(request, response) {
 		owner: request.user._id,
 	};
 
+	const list = await List.findOne({ _id: request.params.list })
+	if (!list) return response.status(404).end();
+
 	const { comparisons } = await List.findOneAndUpdate(filter, {
 		$pull: { items: { _id: request.params.item } },
 		$unset: { [`comparisons.${request.params.item}`]: 1 }
@@ -113,6 +116,32 @@ async function delItem(request, response) {
 
 	const $unset = generateNestedUnsets(request.params.item, comparisons);
 	if (Object.keys($unset).length) await List.updateOne(filter, { $unset });
+
+	const updatedList = await List.findOne({ _id: request.params.list })
+
+	const { progress, order } = list.getSortInfo({ progress: true, order: true })
+	const $set = {};
+	if (progress === 1) {
+		const sorter = updatedList.getSorter().sorter;
+		for (let question = sorter.getQuestion(); question; question = sorter.getQuestion()){
+			const a = updatedList.items[question[0]]._id.toString();
+			const b = updatedList.items[question[1]]._id.toString();
+			const aIndex = list.items.findIndex(item => item._id.toString() === a);
+			const oldAIndex = order.indexOf(aIndex);
+			const bIndex = list.items.findIndex(item => item._id.toString() === b);
+			const oldBIndex = order.indexOf(bIndex);
+
+			const result = oldAIndex < oldBIndex ? -1 : 1;
+			$set[`comparisons.${a}.${b}`] = { result };
+			sorter.addAnswer(result);
+		}
+		await List.updateOne({
+			_id: request.params.list,
+			owner: request.user._id,
+		}, {
+			$set
+		});
+	}
 
 	response.redirect('/list/' + request.params.list + '#unsorted-tab');
 }
