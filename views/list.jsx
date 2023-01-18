@@ -25,7 +25,7 @@ export default function Index({ list, order, isOwner, progress, denormalizedComp
 		<Title list={list} progress={progress} />
 
 		<div className="float-end">
-			Created At: <time datetime={list.updatedAt.toISOString()}>{list.createdAt.toLocaleString()}</time>
+			Created At: <time dateTime={list.updatedAt.toISOString()}>{list.createdAt.toLocaleString()}</time>
 			{list.createdAt.getTime() !== list.updatedAt.getTime()
 				? <>
 					<br/>

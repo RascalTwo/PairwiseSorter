@@ -4,7 +4,7 @@ import { durationToLargestUnit } from '../helpers';
 export default function TimeAgo({ date }){
 	const now = Date.now();
 	return <time
-		datetime={date.toISOString()}
+		dateTime={date.toISOString()}
 		data-bs-toggle="tooltip"
 		data-bs-title={date.toLocaleString()}
 		title={date.toLocaleString()}
