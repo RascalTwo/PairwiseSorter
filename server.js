@@ -60,5 +60,14 @@ module.exports = function createServer(client) {
 	app.use(require('./routers/user.js'));
 	app.use(require('./routers/list.js'));
 
+	app.use((request, response) => {
+		response.status(404).render('error', { message: `Page "${request.originalURL}" not found` });
+	});
+
+	app.use((error, request, response, next) => {
+		console.error(error);
+		response.status(500).render('error', { message: error.message || error.stack || error });
+	});
+
 	return app
 }
