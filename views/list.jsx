@@ -16,8 +16,8 @@ export default function Index({ list, order, isOwner, progress, denormalizedComp
 					? <a className="btn btn-primary" href={`/list/${list._id}/comparisons`}>Sort</a>
 					: null
 				}
-				<a className="btn btn-warning" href={`/list/${list._id}/comparisons?_method=PUT`}>Reset</a>
-				<a className="btn btn-danger" href={`/list/${list._id}?_method=DELETE`}>Delete</a>
+				<a className="btn btn-warning" href={`/list/${list._id}/comparisons?_method=PUT`} data-confirm={`reset all comparisons within ${list.name}`}>Reset</a>
+				<a className="btn btn-danger" href={`/list/${list._id}?_method=DELETE`} data-confirm={`delete ${list.name}, containing ${list.items.length} items`}>Delete</a>
 				<a className="btn btn-primary" href={`/list/${list._id}?public=${!list.public}&_method=PATCH`}>Make {list.public ? 'Private' : 'Public'}</a>
 			</div>
 			: null

@@ -74,3 +74,10 @@ links.forEach(link => link.addEventListener('click', event => {
 	autoAnimate(sorting);
 	document.querySelector('#sorting-container button').addEventListener('click', playAnimation);
 })();
+
+function confirmBeforeNavigate(event) {
+	const query = event.currentTarget.dataset.confirm;
+	if (!confirm(query ? `Are you sure you want to ${query}?` : 'Are you sure?')) event.preventDefault();
+}
+
+document.querySelectorAll('[data-confirm]').forEach(anchor => anchor.addEventListener('click', confirmBeforeNavigate));
