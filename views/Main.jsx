@@ -57,7 +57,7 @@ export default function Main({ url, user, message, children }) {
 					</a>
 					: null
 				}
-				<main className="container">
+				<main className="container pt-2">
 
 					{children}
 
