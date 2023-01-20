@@ -9,13 +9,13 @@ const runUserJavaScript = (() => {
 	const consentedCode = JSON.parse(localStorage.getItem('r2-consented-code') || '{}');
 	const cachedExecutions = new Map(Object.entries(JSON.parse(localStorage.getItem('r2-code-executions') || '{}')));
 
-	const executions = new Map();
-
 	let executing = false;
-	async function startExecutions() {
-		if (executing) return;
+	async function startExecutions(executions) {
+		while (executing) await new Promise(r => setTimeout(r, 1000));
+		executing = true;
 
-		for (const [key, targets] of [...executions.entries()]) {
+		try {
+			for (const [key, targets] of [...executions.entries()]) {
 			const { base64, name } = JSON.parse(key);
 
 			const html = await new Promise((resolve, reject) => {
@@ -43,7 +43,11 @@ const runUserJavaScript = (() => {
 			});
 
 			for (const target of targets) target.innerHTML = html;
-			executions.delete(key);
+			}
+		} catch (e) {
+			console.error(e);
+		} finally {
+			executing = false;
 		}
 	}
 
@@ -57,6 +61,7 @@ const runUserJavaScript = (() => {
 		consentedCode[base64] = true;
 		localStorage.setItem('r2-consented-code', JSON.stringify(consentedCode));
 
+		const executions = new Map();
 		for (const itemNameEl of document.querySelectorAll(`[data-html-generating-code="${base64}"] .item-name`)) {
 			itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
 			itemNameEl.querySelector('button').remove();
@@ -64,13 +69,21 @@ const runUserJavaScript = (() => {
 			executions.set(key, [...(executions.get(key) || []), itemNameEl]);
 		}
 
-		return startExecutions().catch(console.error).finally(() => executing = false);
+		return startExecutions(executions);
 	}
+
+	const observer = new IntersectionObserver(entries => {
+		for (const { target: itemNameEl, isIntersecting } of entries) {
+			if (!isIntersecting) continue;
+			observer.unobserve(itemNameEl);
+			startExecutions(new Map([[JSON.stringify(getKey(itemNameEl)), [itemNameEl]]]));
+		}
+	}, { threshold: 1 });
 
 	function start() {
 		for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name:not([data-processed])')) {
 			itemNameEl.dataset.processed = true;
-			itemNameEl.innerHTML = ''
+			itemNameEl.childNodes[0].remove();
 
 			const key = getKey(itemNameEl);
 			const keyStr = JSON.stringify(key);
@@ -79,9 +92,8 @@ const runUserJavaScript = (() => {
 			checkbox.addEventListener('change', e => {
 				if (e.currentTarget.checked) {
 					itemNameEl.innerHTML = ''
-					executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
 					itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
-					return startExecutions().catch(console.error).finally(() => executing = false);
+					return startExecutions(new Map([[keyStr, [itemNameEl]]]));
 				} else {
 					itemNameEl.innerHTML = key.name
 				}
@@ -91,13 +103,12 @@ const runUserJavaScript = (() => {
 				delete (cachedExecutions.get(key.base64) || {})[key.name];
 
 				itemNameEl.innerHTML = ''
-				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
 				itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
-				return startExecutions().catch(console.error).finally(() => executing = false);
+				return startExecutions(new Map([[keyStr, [itemNameEl]]]));
 			});
 
 			if (consentedCode[key.base64] === true) {
-				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
+				observer.observe(itemNameEl);
 				itemNameEl.insertAdjacentHTML('beforeend', SPINNER);
 				continue;
 			}
@@ -115,8 +126,6 @@ const runUserJavaScript = (() => {
 
 			itemNameEl.appendChild(button);
 		}
-
-		return startExecutions().catch(console.error).finally(() => executing = false);
 	}
 
 	return start;
