@@ -83,13 +83,13 @@ async function generateHTML(name){
 
 		<ul className="nav justify-content-center nav-tabs">
 			<li className="nav-item">
-				<a className="nav-link" href="#unsorted-tab">Unsorted</a>
+				<a className="nav-link" href="#unsorted-tab">Unsorted ({list.items.length.toLocaleString()})</a>
 			</li>
 			<li className="nav-item">
-				<a className="nav-link" href="#sorted-tab">Sorted</a>
+				<a className="nav-link" href="#sorted-tab">Sorted ({order.length.toLocaleString()})</a>
 			</li>
 			<li className="nav-item">
-				<a className="nav-link" href="#comparisons-tab">Comparisons</a>
+				<a className="nav-link" href="#comparisons-tab">Comparisons ({denormalizedComparisons.length.toLocaleString()})</a>
 			</li>
 		</ul>
 
