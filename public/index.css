@@ -61,11 +61,10 @@ kbd {
 	}
 
 #sorting-container {
-	padding: 2.5rem;
+	padding: 2.5rem 0;
 }
 
 	#sorting-container .card {
-		width: max-content;
 		margin: auto;
 	}
 

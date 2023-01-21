@@ -45,7 +45,8 @@ links.forEach(link => link.addEventListener('click', event => {
 		this.textContent = 'Replay Animaion';
 	
 		sorting.innerHTML = '';
-		for (const state of sortStates) {
+		const rate = 10000 / (sortStates.length - 5);
+		for (const [s, state] of sortStates.entries()) {
 			for (let i = 0; i <= state.order.length; i++) {
 				const index = i < state.order.length ? state.order[i] : -1;
 				let li;
@@ -54,7 +55,7 @@ links.forEach(link => link.addEventListener('click', event => {
 				} else {
 					li = document.createElement('li');
 					li.dataset.index = index;
-					li.textContent = list.items[index]?.name || '';
+					li.textContent = index || '';
 					sorting.insertBefore(li, sorting.children[i]);
 				}
 				li.dataset.sorting = !!state.current;
@@ -63,7 +64,7 @@ links.forEach(link => link.addEventListener('click', event => {
 				li.dataset.comparing = state.current ? i === state.current.try : false;
 			}
 
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise(resolve => setTimeout(resolve, s < 5 ? 1000 : rate));
 			if (!playing) return;
 		}
 
