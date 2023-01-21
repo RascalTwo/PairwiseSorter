@@ -9,6 +9,11 @@ const runUserJavaScript = (() => {
 	const consentedCode = JSON.parse(localStorage.getItem('r2-consented-code') || '{}');
 	const cachedExecutions = new Map(Object.entries(JSON.parse(localStorage.getItem('r2-code-executions') || '{}')));
 
+	const root = document.querySelector('[data-html-generating-code]')
+	const query = root?.dataset.query;
+	const highlightQueryMatches = root?.dataset.highlightQueryMatches === 'true';
+	const queryRegex = new RegExp(`(${query})`, 'ig');
+
 	let executing = false;
 	async function startExecutions(executions) {
 		while (executing) await new Promise(r => setTimeout(r, 1000));
@@ -16,33 +21,44 @@ const runUserJavaScript = (() => {
 
 		try {
 			for (const [key, targets] of [...executions.entries()]) {
-			const { base64, name } = JSON.parse(key);
+				const { base64, name } = JSON.parse(key);
 
-			const html = await new Promise((resolve, reject) => {
-				const cached = cachedExecutions.get(base64) || {};
-				if (name in cached) return resolve(cached[name]);
+				let html = await new Promise((resolve, reject) => {
+					const cached = cachedExecutions.get(base64) || {};
+					if (name in cached) return resolve(cached[name]);
 
-				const plugin = new jailed.DynamicPlugin(`
-					${atob(base64)}
+					const plugin = new jailed.DynamicPlugin(`
+						${atob(base64)}
 
-					application.setInterface({
-						generateHTMLAsCallback(name, callback){
-							generateHTML(name).then(callback).catch(callback);
-						}
-					});`,
-					{}
-				)
-				plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, html => {
-					cached[name] = html;
-					if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
+						application.setInterface({
+							generateHTMLAsCallback(name, callback){
+								generateHTML(name).then(callback).catch(callback);
+							}
+						});`,
+						{}
+					)
+					plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, html => {
+						cached[name] = html;
+						if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
 
-					localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
-					return resolve(html);
-				}));
-				plugin.whenFailed(reject);
-			});
+						localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
+						return resolve(html);
+					}));
+					plugin.whenFailed(reject);
+				});
 
-			for (const target of targets) target.innerHTML = html;
+				if (query) {
+					if (!queryRegex.test(html)) for (const target of targets) {
+						const li = target.closest('li');
+						if (li.dataset.queriesLeft) {
+							const newQueriesLeft = Number(li.dataset.queriesLeft) - 1;
+							if (!newQueriesLeft) li.remove();
+							li.dataset.queriesLeft = newQueriesLeft;
+						} else li.remove();
+					};
+					if (highlightQueryMatches) html = html.replace(queryRegex, '<mark>$1</mark>');
+				}
+				for (const target of targets) target.innerHTML = html;
 			}
 		} catch (e) {
 			console.error(e);

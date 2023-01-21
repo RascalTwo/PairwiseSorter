@@ -1,10 +1,11 @@
 import React from 'react';
 import ItemContent from './ItemContent';
+import { filterQueriedItems } from '../helpers'
 
-export default ({ list, isOwner }) => <ul className="list-group" id="unsorted-tab">
-	{list.items.map(item =>
+export default ({ list, isOwner, query, highlightQueryMatches }) => <ul className="list-group" id="unsorted-tab">
+	{filterQueriedItems(list.items, query, !!list.htmlGeneratingCode).map(item =>
 		<li key={item._id} className="list-group-item d-flex justify-content-between align-items-center">
-			<ItemContent name={item.name} htmlGenerated={!!list.htmlGeneratingCode} />
+			<ItemContent name={item.name} htmlGenerated={!!list.htmlGeneratingCode} query={query} highlightQueryMatches={highlightQueryMatches} />
 			{isOwner
 				? <div className="btn-group" role="group" aria-label="Item Actions">
 					<a className="btn btn-primary" href={`/list/${list._id}/${item._id}`}>Rename</a>

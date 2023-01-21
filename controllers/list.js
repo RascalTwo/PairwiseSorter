@@ -58,6 +58,9 @@ async function render(request, response) {
 	});
 }
 
+async function renderSearch(request, response) {
+	return render(request, response, null, { query: request.query.query, highlightQueryMatches: !!request.query.highlight });
+}
 
 async function compareItems(request, response) {
 	await List.updateOne({
@@ -315,4 +318,4 @@ async function toggleItemCompleted(request, response){
 	return response.redirect('/list/' + request.params.list + '#sorted-tab')
 }
 
-module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems, toggleItemCompleted };
+module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems, toggleItemCompleted, renderSearch };

@@ -16,6 +16,8 @@ router.route('/list/:list')
 	.patch(listController.update)
 	.delete(listController.del);
 
+router.get('/list/:list/search', listController.renderSearch);
+
 router.route('/list/:list/comparisons')
 	.get(listController.renderNextComparison)
 	.put(listController.resetComparisons);

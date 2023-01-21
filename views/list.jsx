@@ -8,7 +8,8 @@ import ComparisonsList from './components/ComparisonsList';
 import TimeAgo from './components/TimeAgo';
 import Card from './components/Card';
 
-export default function Index({ list, order, isOwner, progress, denormalizedComparisons, states, ...mainProps }) {
+export default function Index({ list, order, isOwner, progress, denormalizedComparisons, states, query, highlightQueryMatches, ...mainProps }) {
+	const checkHighlightToggle = highlightQueryMatches !== undefined ? highlightQueryMatches : !list.htmlGeneratingCode;
 	return <Main {...mainProps}>
 		{isOwner
 			? <div className="btn-group float-end" role="group" aria-label="List Actions">
@@ -80,6 +81,19 @@ async function generateHTML(name){
 				</details>
 				: null
 		}
+		<details open={!!query}>
+			<summary>Search</summary>
+
+			<form action={`/list/${list._id}/search`} id="search-form" method="GET">
+				<label htmlFor="query" className="form-label" hidden>Search</label>
+				<input className="form-control" id="query" name="query" placeholder="Search for Text" defaultValue={query} />
+				<div class="form-check form-switch">
+					<input class="form-check-input" type="checkbox" role="switch" id="highlight" name="highlight" checked={checkHighlightToggle} defaultValue={checkHighlightToggle} />
+					<label class="form-check-label" for="highlight">Highlight Matches</label>
+				</div>
+				<button className="btn btn-primary">Search</button>
+			</form>
+		</details>
 
 		<ul className="nav justify-content-center nav-tabs">
 			<li className="nav-item">
@@ -93,10 +107,10 @@ async function generateHTML(name){
 			</li>
 		</ul>
 
-		<span data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
-			<SortedList list={list} order={order} />
-			<UnsortedList list={list} isOwner={isOwner} />
-			<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} />
+		<span data-query={query} data-highlight-query-matches={highlightQueryMatches} data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
+			<SortedList list={list} order={order} query={query} highlightQueryMatches={highlightQueryMatches} />
+			<UnsortedList list={list} isOwner={isOwner} query={query} highlightQueryMatches={highlightQueryMatches} />
+			<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} query={query} highlightQueryMatches={highlightQueryMatches} />
 		</span>
 
 		<div id="sorting-container">
