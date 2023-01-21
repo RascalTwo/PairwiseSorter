@@ -20,6 +20,10 @@
 	min-height: 5rem;
 }
 
+.comparisons-list li > div {
+	max-width: 40%;
+}
+
 .comparisons-list li ul {
 	padding: 0;
 }
@@ -110,4 +114,12 @@ kbd {
 
 .item-name-wrapper > div > button {
 	padding: 0 .1rem;
+}
+
+#sorted-tab li > a {
+	flex: 0 0 9rem;
+}
+
+#unsorted-tab li > .btn-group {
+	flex: 0 0 23rem;
 }
