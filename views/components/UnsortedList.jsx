@@ -1,10 +1,10 @@
 import React from 'react';
 import ItemContent from './ItemContent';
-import { filterQueriedItems } from '../helpers'
+import { applyQueryToItems } from '../helpers'
 
 export default ({ list, isOwner, query, highlightQueryMatches }) => <ul className="list-group" id="unsorted-tab">
-	{filterQueriedItems(list.items, query, !!list.htmlGeneratingCode).map(item =>
-		<li key={item._id} className="list-group-item d-flex justify-content-between align-items-center">
+	{applyQueryToItems(list.items, query, !!list.htmlGeneratingCode).map(item =>
+		<li key={item._id} className={`list-group-item d-flex justify-content-between align-items-center ${item.display ? '' : 'd-none'}`}>
 			<ItemContent name={item.name} htmlGenerated={!!list.htmlGeneratingCode} query={query} highlightQueryMatches={highlightQueryMatches} />
 			{isOwner
 				? <div className="btn-group" role="group" aria-label="Item Actions">

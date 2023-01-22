@@ -86,7 +86,7 @@ async function generateHTML(name){
 
 			<form action={`/list/${list._id}/search`} id="search-form" method="GET">
 				<label htmlFor="query" className="form-label" hidden>Search</label>
-				<input className="form-control" id="query" name="query" placeholder="Search for Text" defaultValue={query} />
+				<input className="form-control" id="query" name="query" placeholder="Search for Text" defaultValue={query} autoComplete="off" />
 				<div class="form-check form-switch">
 					<input class="form-check-input" type="checkbox" role="switch" id="highlight" name="highlight" checked={checkHighlightToggle} defaultValue={checkHighlightToggle} />
 					<label class="form-check-label" for="highlight">Highlight Matches</label>
@@ -107,7 +107,7 @@ async function generateHTML(name){
 			</li>
 		</ul>
 
-		<span data-query={query} data-highlight-query-matches={highlightQueryMatches} data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
+		<span data-searchable={true} data-query={query} data-highlight-query-matches={highlightQueryMatches} data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
 			<SortedList list={list} order={order} query={query} highlightQueryMatches={highlightQueryMatches} />
 			<UnsortedList list={list} isOwner={isOwner} query={query} highlightQueryMatches={highlightQueryMatches} />
 			<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} query={query} highlightQueryMatches={highlightQueryMatches} />

@@ -4,15 +4,106 @@ if (alertAnchor) alertAnchor.addEventListener('click', (e) => {
 	alertAnchor.remove();
 });
 
-const runUserJavaScript = (() => {
+const handleSearchVisibility = (() => {
+	function getSearchParameters(query, highlightMatches){
+		return {
+			query,
+			highlightMatches,
+			regex: new RegExp(`(${query})`, 'i')
+		}
+	}
+	const root = document.querySelector('[data-searchable]')
+
+	const search = getSearchParameters(root?.dataset.query, root?.dataset.highlightQueryMatches === 'true');
+
+
+	let updating = false;
+	async function updateVisibilities(){
+		while (updating) await new Promise(r => setTimeout(r, 1000));
+		try {
+			updating = true;
+			document.querySelectorAll('[data-searchable] .item-name').forEach(handleSearchVisibility);
+			return renderAllRemainingUserJavaScript();
+		} finally {
+			updating = false;
+		}
+	}
+
+	document.querySelector('#query')?.addEventListener('input', e => {
+		Object.assign(search, getSearchParameters(e.currentTarget.value, document.querySelector('#highlight').checked));
+		return updateVisibilities();
+	});
+	document.querySelector('#highlight')?.addEventListener('change', e => {
+		Object.assign(search, getSearchParameters(document.querySelector('#query').value, e.currentTarget.checked));
+		return updateVisibilities();
+	});
+
+	function handleSearchVisibility(target){
+		const text = target.innerText;
+		const li = target.closest('li');
+
+		if (search.query && !search.regex.test(text)) {
+			if (li.dataset.queriesLeft) {
+				const newQueriesLeft = Number(li.dataset.queriesLeft) - 1;
+				if (!newQueriesLeft) li.classList.add('d-none');
+				li.dataset.queriesLeft = newQueriesLeft;
+			} else li.classList.add('d-none');
+			return;
+		}
+
+		const marks = li.querySelectorAll('mark');
+		for (const mark of marks) mark.parentNode.replaceChild(document.createTextNode(mark.innerText), mark);
+		while (true){
+			const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT, null, false);
+			let changed = false;
+			while (walker.nextNode()) {
+				const node = walker.currentNode;
+				const next = node.nextSibling;
+				if (next && next.nodeType === Node.TEXT_NODE) {
+					node.nodeValue += next.nodeValue;
+					next.parentNode.removeChild(next);
+					changed = true;
+				}
+			}
+			if (!changed) break;
+		}
+		if (search.query && search.highlightMatches) {
+			const walker = document.createTreeWalker(li, NodeFilter.SHOW_TEXT, null, false);
+			while (walker.nextNode()) {
+				const node = walker.currentNode;
+				const text = node.nodeValue;
+
+				const matches = text.match(search.regex);
+				if (!matches) continue;
+
+
+				const parent = node.parentNode;
+
+				const prefix = document.createTextNode(text.slice(0, matches.index));
+				parent.insertBefore(prefix, node);
+
+				const mark = document.createElement('mark');
+				mark.innerText = matches[0];
+				parent.insertBefore(mark, node);
+
+				const suffix = document.createTextNode(text.slice(matches.index + matches[0].length));
+				parent.insertBefore(suffix, node);
+
+				parent.removeChild(node)
+			}
+		}
+		if (li.dataset.queriesLeft) li.dataset.queriesLeft = 2;
+		li.classList.remove('d-none');
+	}
+
+	return handleSearchVisibility;
+})();
+
+const { runUserJavaScript, renderAllRemainingUserJavaScript } = (() => {
 	const SPINNER = '<div class="spinner-border" role="status"></div>';
 	const consentedCode = JSON.parse(localStorage.getItem('r2-consented-code') || '{}');
 	const cachedExecutions = new Map(Object.entries(JSON.parse(localStorage.getItem('r2-code-executions') || '{}')));
 
-	const root = document.querySelector('[data-html-generating-code]')
-	const query = root?.dataset.query;
-	const highlightQueryMatches = root?.dataset.highlightQueryMatches === 'true';
-	const queryRegex = new RegExp(`(${query})`, 'ig');
 
 	let executing = false;
 	async function startExecutions(executions) {
@@ -47,18 +138,10 @@ const runUserJavaScript = (() => {
 					plugin.whenFailed(reject);
 				});
 
-				if (query) {
-					if (!queryRegex.test(html)) for (const target of targets) {
-						const li = target.closest('li');
-						if (li.dataset.queriesLeft) {
-							const newQueriesLeft = Number(li.dataset.queriesLeft) - 1;
-							if (!newQueriesLeft) li.remove();
-							li.dataset.queriesLeft = newQueriesLeft;
-						} else li.remove();
-					};
-					if (highlightQueryMatches) html = html.replace(queryRegex, '<mark>$1</mark>');
+				for (const target of targets) {
+					target.innerHTML = html;
+					handleSearchVisibility(target);
 				}
-				for (const target of targets) target.innerHTML = html;
 			}
 		} catch (e) {
 			console.error(e);
@@ -97,8 +180,7 @@ const runUserJavaScript = (() => {
 	}, { threshold: 1 });
 
 	function start() {
-		for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name:not([data-processed])')) {
-			itemNameEl.dataset.processed = true;
+		for (const itemNameEl of document.querySelectorAll('[data-html-generating-code] .item-name')) {
 			itemNameEl.childNodes[0].remove();
 
 			const key = getKey(itemNameEl);
@@ -144,7 +226,24 @@ const runUserJavaScript = (() => {
 		}
 	}
 
-	return start;
+	let allRendered = false;
+	function renderAllRemainingUserJavaScript(){
+		if (allRendered) return;
+		allRendered = true;
+		const executions = new Map();
+
+		for (const itemNameEl of document.querySelectorAll(`[data-html-generating-code] .item-name`)) {
+			const key = getKey(itemNameEl);
+			if (consentedCode[key.base64]) {
+				const keyStr = JSON.stringify(key);
+				executions.set(keyStr, [...(executions.get(keyStr) || []), itemNameEl]);
+			}
+		}
+
+		return startExecutions(executions);
+	}
+
+	return { runUserJavaScript: start, renderAllRemainingUserJavaScript };
 })();
 
 runUserJavaScript();

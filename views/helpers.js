@@ -12,7 +12,10 @@ export function durationToLargestUnit(duration) {
 	return [0, 'second'];
 }
 
-export function filterQueriedItems(items, query, htmlGenerated){
+export function applyQueryToItems(items, query, htmlGenerated){
 	const regex = new RegExp(query, 'ig');
-	return items.filter(item => !query || htmlGenerated || regex.test(item.name))
+	return items.map(item => {
+		item.display = !query || htmlGenerated || regex.test(item.name)
+		return item;
+	});
 }
