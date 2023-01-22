@@ -54,6 +54,7 @@ async function render(request, response) {
 		list,
 		denormalizedComparisons: denormalizedComparisons.sort((a, b) => b.createdAt - a.createdAt),
 		...list.getSortInfo({ progress: true, order: true, states: true }),
+		showAll: request.query.showAll === 'true',
 		...arguments[3] || {}
 	});
 }

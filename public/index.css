@@ -123,6 +123,10 @@ mark {
 	flex: 0 0 9rem;
 }
 
+#sorted-tab > li > form > button {
+	width: 9rem;
+}
+
 #unsorted-tab li > .btn-group {
 	flex: 0 0 23rem;
 }

@@ -8,7 +8,7 @@ import ComparisonsList from './components/ComparisonsList';
 import TimeAgo from './components/TimeAgo';
 import Card from './components/Card';
 
-export default function Index({ list, order, isOwner, progress, denormalizedComparisons, states, query, highlightQueryMatches, ...mainProps }) {
+export default function Index({ list, order, isOwner, progress, denormalizedComparisons, states, query, highlightQueryMatches, showAll, ...mainProps }) {
 	const checkHighlightToggle = highlightQueryMatches !== undefined ? highlightQueryMatches : !list.htmlGeneratingCode;
 	return <Main {...mainProps}>
 		{isOwner
@@ -108,7 +108,7 @@ async function generateHTML(name){
 		</ul>
 
 		<span data-searchable={true} data-query={query} data-highlight-query-matches={highlightQueryMatches} data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
-			<SortedList list={list} order={order} query={query} highlightQueryMatches={highlightQueryMatches} />
+			<SortedList list={list} order={order} query={query} highlightQueryMatches={highlightQueryMatches} showAll={showAll} />
 			<UnsortedList list={list} isOwner={isOwner} query={query} highlightQueryMatches={highlightQueryMatches} />
 			<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} query={query} highlightQueryMatches={highlightQueryMatches} />
 		</span>
