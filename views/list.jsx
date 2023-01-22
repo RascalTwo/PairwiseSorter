@@ -81,7 +81,7 @@ async function generateHTML(name){
 				</details>
 				: null
 		}
-		<details open={!!query}>
+		<details id="search-details" open={!!query}>
 			<summary>Search</summary>
 
 			<form action={`/list/${list._id}/search`} id="search-form" method="GET">

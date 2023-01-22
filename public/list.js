@@ -82,3 +82,14 @@ function confirmBeforeNavigate(event) {
 }
 
 document.querySelectorAll('[data-confirm]').forEach(anchor => anchor.addEventListener('click', confirmBeforeNavigate));
+
+window.addEventListener('keydown', event => {
+	if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+
+	if (((event.ctrlKey || event.metaKey) && event.key === 'f') || event.key === '/') {
+		event.preventDefault();
+		const details = document.querySelector('#search-details');
+		if (!details.open) details.open = true;
+		document.querySelector('#query').focus();
+	}
+});
