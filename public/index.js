@@ -114,28 +114,49 @@ const { runUserJavaScript, renderAllRemainingUserJavaScript } = (() => {
 			for (const [key, targets] of [...executions.entries()]) {
 				const { base64, name } = JSON.parse(key);
 
-				let html = await new Promise((resolve, reject) => {
+				let html = await new Promise(async (resolve, reject) => {
 					const cached = cachedExecutions.get(base64) || {};
 					if (name in cached) return resolve(cached[name]);
 
-					const plugin = new jailed.DynamicPlugin(`
-						${atob(base64)}
+					if (localStorage.getItem('bypass-jailed')) {
+						try {
+							setTimeout(() => resolve('Timed Out'), 10000)
+							eval(atob(base64));
+							const html = await generateHTML(name);
+							cached[name] = html;
+							if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
 
-						application.setInterface({
-							generateHTMLAsCallback(name, callback){
-								generateHTML(name).then(callback).catch(callback);
-							}
-						});`,
-						{}
-					)
-					plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, html => {
-						cached[name] = html;
-						if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
+							localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
+							return resolve(html);
+						}
+						catch (e) {
+							reject(e)
+						}
+					} else {
+						const plugin = new jailed.DynamicPlugin(`
+							${atob(base64)}
 
-						localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
-						return resolve(html);
-					}));
-					plugin.whenFailed(reject);
+							application.setInterface({
+								generateHTMLAsCallback(name, callback){
+									generateHTML(name).then(callback).catch(callback);
+								}
+							});`,
+							{}
+						)
+						plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, html => {
+							plugin.disconnect();
+							cached[name] = html;
+							if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
+
+							localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
+							return resolve(html);
+						}));
+						plugin.whenFailed(reject);
+						setTimeout(() => {
+							plugin.disconnect();
+							return resolve('Timed Out');
+						}, 10000)
+					}
 				});
 
 				for (const target of targets) {
