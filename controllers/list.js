@@ -147,7 +147,7 @@ async function delItem(request, response) {
 		});
 	}
 
-	response.redirect('/list/' + request.params.list + '#unsorted-tab');
+	response.redirect(request.query.redirectTo || ('/list/' + request.params.list + '#unsorted-tab'));
 }
 
 function generateNestedUnsets(deleting, comparisons) {
@@ -248,12 +248,13 @@ async function renderItemRename(request, response) {
 	return response.render('rename-item', {
 		list,
 		item,
+		redirectTo: request.query.redirectTo,
 		...arguments[3] || {}
 	});
 }
 
 async function updateItem(request, response, next) {
-	if (request.body.name === '') return renderItemRename(request, response, next, { message: 'New item name cannot be empty' });
+	if (request.body.name === '') return renderItemRename(request, response, next, { redirectTo: request.body.redirectTo, message: 'New item name cannot be empty' });
 	await List.updateOne({
 		_id: request.params.list,
 		owner: request.user._id,
@@ -264,7 +265,7 @@ async function updateItem(request, response, next) {
 		}
 	});
 
-	response.redirect('/list/' + request.params.list + '#unsorted-tab');
+	response.redirect(request.body.redirectTo || ('/list/' + request.params.list + '#unsorted-tab'));
 }
 
 async function bulkEditItems(request, response) {

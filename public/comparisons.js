@@ -1,4 +1,4 @@
-let anchors = document.querySelectorAll('#comparisons-container a');
+let anchors = document.querySelectorAll('#comparisons-container a.compare-item');
 const options = [
 	['ArrowLeft', 'a', 'Left'],
 	['ArrowUp', 'w', 'Up'],
@@ -25,7 +25,7 @@ function handleClick(e){
 		if (!response.url.endsWith('comparisons')) return window.location = response.url;
 		return response.text().then(html => {
 			document.querySelector('html').innerHTML = html;
-			anchors = document.querySelectorAll('#comparisons-container a');
+			anchors = document.querySelectorAll('#comparisons-container a.compare-item');
 			anchors.forEach(a => a.addEventListener('click', handleClick));
 			runUserJavaScript();
 			clicked = false;
@@ -34,3 +34,11 @@ function handleClick(e){
 }
 
 anchors.forEach(a => a.addEventListener('click', handleClick));
+
+
+function confirmBeforeNavigate(event) {
+	const query = event.currentTarget.dataset.confirm;
+	if (!confirm(query ? `Are you sure you want to ${query}?` : 'Are you sure?')) event.preventDefault();
+}
+
+document.querySelectorAll('[data-confirm]').forEach(anchor => anchor.addEventListener('click', confirmBeforeNavigate));
