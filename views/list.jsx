@@ -51,10 +51,11 @@ export default function Index({ list, order, isOwner, progress, denormalizedComp
  * Return the HTML content representing the current item, sandboxed in an <iframe>.
  *
  * @param {string} name Name of item
+ * @param {boolean} isComparison If currently on the comparison screen
  * @returns {string} HTML of item
  */
-async function generateHTML(name){
-	return \`<span style="color: red;">\${name}</span>\`;
+async function generateHTML(name, isComparison){
+	return \`<span style="color: $\{isComparison ? 'red' : 'blue'\};">\${name}</span>\`;
 }`.trim()} rows={10}></textarea>
 						<button className="btn btn-primary">Update</button>
 					</form>

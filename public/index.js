@@ -104,6 +104,7 @@ const { runUserJavaScript, renderAllRemainingUserJavaScript } = (() => {
 	const consentedCode = JSON.parse(localStorage.getItem('r2-consented-code') || '{}');
 	const cachedExecutions = new Map(Object.entries(JSON.parse(localStorage.getItem('r2-code-executions') || '{}')));
 
+	const isComparison = window.location.pathname.includes('/comparisons');
 
 	let executing = false;
 	async function startExecutions(executions) {
@@ -115,16 +116,17 @@ const { runUserJavaScript, renderAllRemainingUserJavaScript } = (() => {
 				const { base64, name } = JSON.parse(key);
 
 				let html = await new Promise(async (resolve, reject) => {
-					const cached = cachedExecutions.get(base64) || {};
+					const exec = base64 + isComparison
+					const cached = cachedExecutions.get(exec) || {};
 					if (name in cached) return resolve(cached[name]);
 
 					if (localStorage.getItem('bypass-jailed')) {
 						try {
 							setTimeout(() => resolve('Timed Out'), 10000)
 							eval(atob(base64));
-							const html = await generateHTML(name);
+							const html = await generateHTML(name, isComparison);
 							cached[name] = html;
-							if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
+							if (!cachedExecutions.has(exec)) cachedExecutions.set(exec, cached);
 
 							localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
 							return resolve(html);
@@ -137,16 +139,16 @@ const { runUserJavaScript, renderAllRemainingUserJavaScript } = (() => {
 							${atob(base64)}
 
 							application.setInterface({
-								generateHTMLAsCallback(name, callback){
-									generateHTML(name).then(callback).catch(callback);
+								generateHTMLAsCallback(name, isComparison, callback){
+									generateHTML(name, isComparison).then(callback).catch(callback);
 								}
 							});`,
 							{}
 						)
-						plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, html => {
+						plugin.whenConnected(() => plugin.remote.generateHTMLAsCallback(name, isComparison, html => {
 							plugin.disconnect();
 							cached[name] = html;
-							if (!cachedExecutions.has(base64)) cachedExecutions.set(base64, cached);
+							if (!cachedExecutions.has(exec)) cachedExecutions.set(exec, cached);
 
 							localStorage.setItem('r2-code-executions', JSON.stringify(Object.fromEntries(cachedExecutions.entries())));
 							return resolve(html);
