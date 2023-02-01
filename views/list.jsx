@@ -88,9 +88,9 @@ async function generateHTML(name, isComparison){
 			<form action={`/list/${list._id}/search`} id="search-form" method="GET">
 				<label htmlFor="query" className="form-label" hidden>Search</label>
 				<input className="form-control" id="query" name="query" placeholder="Search for Text" defaultValue={query} autoComplete="off" />
-				<div class="form-check form-switch">
-					<input class="form-check-input" type="checkbox" role="switch" id="highlight" name="highlight" checked={checkHighlightToggle} defaultValue={checkHighlightToggle} />
-					<label class="form-check-label" for="highlight">Highlight Matches</label>
+				<div className="form-check form-switch">
+					<input className="form-check-input" type="checkbox" role="switch" id="highlight" name="highlight" checked={checkHighlightToggle} defaultValue={checkHighlightToggle} />
+					<label className="form-check-label" htmlFor="highlight">Highlight Matches</label>
 				</div>
 				<button className="btn btn-primary">Search</button>
 			</form>
