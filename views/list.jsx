@@ -109,8 +109,8 @@ async function generateHTML(name, isComparison){
 		</ul>
 
 		<span data-searchable={true} data-query={query} data-highlight-query-matches={highlightQueryMatches} data-html-generating-code={list.htmlGeneratingCode ? Buffer.from(list.htmlGeneratingCode).toString('base64') : undefined}>
-			<SortedList list={list} order={order} query={query} highlightQueryMatches={highlightQueryMatches} showAll={showAll} />
-			<UnsortedList list={list} isOwner={isOwner} query={query} highlightQueryMatches={highlightQueryMatches} />
+			<SortedList list={list} order={order} query={query} highlightQueryMatches={highlightQueryMatches} progress={progress} showAll={showAll} />
+			<UnsortedList list={list} isOwner={isOwner} query={query} highlightQueryMatches={highlightQueryMatches} progress={progress} />
 			<ComparisonsList list={list} isOwner={isOwner} denormalizedComparisons={denormalizedComparisons} query={query} highlightQueryMatches={highlightQueryMatches} />
 		</span>
 
