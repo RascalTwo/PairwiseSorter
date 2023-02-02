@@ -320,4 +320,19 @@ async function toggleItemCompleted(request, response){
 	return response.redirect('/list/' + request.params.list + '#sorted-tab')
 }
 
-module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems, toggleItemCompleted, renderSearch };
+async function cloneList(request, response){
+	const list = await List.findOne({ _id: request.params.list });
+	if (!list) return response.status(404).end();
+
+	const newList = await List.create({
+		owner: request.user._id,
+		name: list.name,
+		htmlGeneratingCode: list.htmlGeneratingCode,
+		items: list.items,
+		comparisons: list.comparisons,
+	});
+
+	return response.redirect('/list/' + newList._id + '#sorted-tab');
+}
+
+module.exports = { create, createItems, del, delItem, resetItem, resetItemComparison, resetComparisons, compareItems, renderNextComparison, render, renderItemRename, updateItem, update, bulkEditItems, toggleItemCompleted, renderSearch, cloneList };

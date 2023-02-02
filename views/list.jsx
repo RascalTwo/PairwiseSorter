@@ -10,9 +10,10 @@ import Card from './components/Card';
 
 export default function Index({ list, order, isOwner, progress, denormalizedComparisons, states, query, highlightQueryMatches, showAll, ...mainProps }) {
 	const checkHighlightToggle = highlightQueryMatches !== undefined ? highlightQueryMatches : !list.htmlGeneratingCode;
+	const { user } = mainProps;
 	return <Main {...mainProps}>
-		{isOwner
-			? <div className="btn-group float-end" role="group" aria-label="List Actions">
+		<div className="btn-group float-end" role="group" aria-label="List Actions">
+			{isOwner ? <>
 				{progress < 1
 					? <a className="btn btn-primary" href={`/list/${list._id}/comparisons`}>Sort</a>
 					: null
@@ -20,9 +21,9 @@ export default function Index({ list, order, isOwner, progress, denormalizedComp
 				<a className="btn btn-warning" href={`/list/${list._id}/comparisons?_method=PUT`} data-confirm={`reset all comparisons within ${list.name}`}>Reset</a>
 				<a className="btn btn-danger" href={`/list/${list._id}?_method=DELETE`} data-confirm={`delete ${list.name}, containing ${list.items.length} items`}>Delete</a>
 				<a className="btn btn-primary" href={`/list/${list._id}?public=${!list.public}&_method=PATCH`}>Make {list.public ? 'Private' : 'Public'}</a>
-			</div>
-			: null
-		}
+			</> : null}
+			{user ? <a className="btn btn-primary" href={`/list/${list._id}/clone`}>Clone</a> : null}
+		</div>
 		<Title list={list} progress={progress} />
 
 		<div className="float-end">

@@ -18,6 +18,8 @@ router.route('/list/:list')
 
 router.get('/list/:list/search', listController.renderSearch);
 
+router.get('/list/:list/clone', listController.cloneList);
+
 router.route('/list/:list/comparisons')
 	.get(listController.renderNextComparison)
 	.put(listController.resetComparisons);
