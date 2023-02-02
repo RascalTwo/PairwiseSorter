@@ -21,12 +21,12 @@ export default ({ user, text, action, oauthAvailable }) => <>
 
 	<form action={'/' + action} method="POST">
 		<label htmlFor="username" className="form-label">Username</label>
-		<input className="form-control" id="username" name="username" required />
+		<input className="form-control" id="username" name="username" autoComplete="username" required />
 
 		{!user.hasOnlyOAuth
 			? <>
 				<label htmlFor="password" className="form-label">Password</label>
-				<input type="password" className="form-control" id="password" name="password" required />
+				<input type="password" className="form-control" id="password" name="password" autoComplete="new-password" required />
 			</>
 			: null
 		}
