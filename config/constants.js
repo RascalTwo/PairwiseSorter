@@ -1,10 +1,13 @@
 const NODE_ENV = process.env.NODE_ENV;
 
+const fs = require('fs');
+const path = require('path');
 const { config } = require('dotenv');
 
 for (const filenames of [`config/.env.${NODE_ENV}`, 'config/.env']) config({ path: filenames });
 
 module.exports = [
+	['npm_package_version', fs.readFileSync(path.join(__dirname, '..', 'package.json')).version],
 	['PORT', 1337],
 	['MONGODB_URL', 'mongodb://localhost:27017/pairwise-sorter'],
 	['SESSION_SECRET', 'secret'],
