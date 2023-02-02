@@ -83,11 +83,17 @@ function confirmBeforeNavigate(event) {
 
 document.querySelectorAll('[data-confirm]').forEach(anchor => anchor.addEventListener('click', confirmBeforeNavigate));
 
-window.addEventListener('keydown', event => {
+window.addEventListener('keydown', async event => {
 	if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
 
 	if (((event.ctrlKey || event.metaKey) && event.key === 'f') || event.key === '/') {
 		event.preventDefault();
+
+		if (document.querySelector('[data-searchable]')?.dataset.progress !== '1') {
+			document.querySelector('a[href="#unsorted-tab"]')?.click();
+			await new Promise(resolve => setTimeout(resolve, 100));
+		}
+
 		const details = document.querySelector('#search-details');
 		if (!details.open) details.open = true;
 		document.querySelector('#query').focus();
