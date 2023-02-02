@@ -1,6 +1,6 @@
 {
   "name": "pairwisesorter",
-  "version": "1.39.5",
+  "version": "1.40.0",
   "description": "",
   "main": "index.js",
   "scripts": {

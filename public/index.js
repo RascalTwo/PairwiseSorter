@@ -38,6 +38,18 @@ const handleSearchVisibility = (() => {
 		return updateVisibilities();
 	});
 
+	function updateTabCounter(ul){
+		if (!ul) return;
+
+		const totalChildrenCount = ul.querySelectorAll(':scope > li > .item-name-wrapper').length;
+		const visibleChildrenCount = ul.querySelectorAll(':scope > li:not(.d-none) > .item-name-wrapper').length;
+
+		const counter = visibleChildrenCount === totalChildrenCount ? visibleChildrenCount : `${visibleChildrenCount}/${totalChildrenCount}`;
+
+		const tab = document.querySelector(`[href="#${ul.id}"]`);
+		tab.textContent = tab.textContent.split(' ')[0] + ` (${counter})`;
+	}
+
 	function handleSearchVisibility(target){
 		const text = target.innerText;
 		const li = target.closest('li');
@@ -48,7 +60,7 @@ const handleSearchVisibility = (() => {
 				if (!newQueriesLeft) li.classList.add('d-none');
 				li.dataset.queriesLeft = newQueriesLeft;
 			} else li.classList.add('d-none');
-			return;
+			return updateTabCounter(li.closest('ul[id]'))
 		}
 
 		const marks = li.querySelectorAll('mark');
@@ -94,6 +106,8 @@ const handleSearchVisibility = (() => {
 		}
 		if (li.dataset.queriesLeft) li.dataset.queriesLeft = 2;
 		li.classList.remove('d-none');
+
+		return updateTabCounter(li.closest('ul[id]'));
 	}
 
 	return handleSearchVisibility;
