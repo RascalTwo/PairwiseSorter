@@ -6,7 +6,7 @@ export default ({ list, order, query, highlightQueryMatches, showAll, progress }
 	<li className="list-group-item d-flex justify-content-between align-items-center">
 		<form className="w-100">
 			<input type="hidden" name="showAll" value={!showAll} />
-			<button className="btn btn-info float-end">{showAll ? 'Show Only Incomplete' : 'Show All'}</button>
+			<button className={`btn btn-${showAll ? 'primary' : 'info'} float-end`}>{showAll ? 'Show Only Incomplete' : 'Show All'}</button>
 		</form>
 	</li>
 
@@ -15,7 +15,7 @@ export default ({ list, order, query, highlightQueryMatches, showAll, progress }
 			<ItemContent name={name} htmlGenerated={!!list.htmlGeneratingCode} query={query} highlightQueryMatches={highlightQueryMatches} />
 			<div className="btn-group" role="group" aria-label="Item Actions">
 				{progress === 1 ? <a className="btn btn-danger" href={`/list/${list._id}/${_id}?_method=DELETE&returnTab=sorted-tab`}>Delete</a> : null}
-				<a className="btn btn-info" href={`/list/${list._id}/${_id}/completed?_method=PATCH&value=${!completedAt}`}>Mark {completedAt ? 'Incomplete' : 'Complete'}</a>
+				<a className={`btn btn-${completedAt ? 'primary' : 'info'}`} href={`/list/${list._id}/${_id}/completed?_method=PATCH&value=${!completedAt}`}>Mark {completedAt ? 'Incomplete' : 'Complete'}</a>
 			</div>
 		</li>
 	)}
