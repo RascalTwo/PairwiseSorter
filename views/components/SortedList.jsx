@@ -14,7 +14,7 @@ export default ({ list, order, query, highlightQueryMatches, showAll, progress }
 		<li key={_id} className={`list-group-item d-flex justify-content-between align-items-center ${display ? '' : 'd-none'}`}>
 			<ItemContent name={name} htmlGenerated={!!list.htmlGeneratingCode} query={query} highlightQueryMatches={highlightQueryMatches} />
 			<div className="btn-group" role="group" aria-label="Item Actions">
-				{progress === 1 ? <a className="btn btn-danger" href={`/list/${list._id}/${_id}?_method=DELETE`}>Delete</a> : null}
+				{progress === 1 ? <a className="btn btn-danger" href={`/list/${list._id}/${_id}?_method=DELETE&returnTab=sorted-tab`}>Delete</a> : null}
 				<a className="btn btn-info" href={`/list/${list._id}/${_id}/completed?_method=PATCH&value=${!completedAt}`}>Mark {completedAt ? 'Incomplete' : 'Complete'}</a>
 			</div>
 		</li>

@@ -147,7 +147,7 @@ async function delItem(request, response) {
 		});
 	}
 
-	response.redirect(request.query.redirectTo || ('/list/' + request.params.list + '#unsorted-tab'));
+	response.redirect(request.body.redirectTo || ('/list/' + request.params.list + '#' + (request.body.returnTab || 'unsorted-tab')));
 }
 
 function generateNestedUnsets(deleting, comparisons) {
